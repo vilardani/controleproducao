@@ -1,0 +1,1560 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1"><style>:root{color-scheme:light}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found]){display:none!important}</style></head><body>
+<title>Painel da Esteira</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  :root{
+    --bg:#F7F5F0; --surface:#FFFFFF; --surface-2:#F0EDE5; --surface-3:#E7E2D5;
+    --ink:#1B1A17; --ink-2:#57544C; --ink-3:#8C887D;
+    --border:#E1DCCF; --border-strong:#CDC6B4;
+    --accent:#A5164E; --accent-ink:#FFFFFF; --accent-soft:#F7E3EC; --accent-soft-border:#EBC0D3;
+    --cat-1:#2a78d6; --cat-2:#eb6834; --cat-3:#1baf7a; --cat-4:#eda100; --cat-5:#e87ba4; --cat-6:#008300; --cat-7:#4a3aa7; --cat-8:#e34948;
+    --seq-100:#cde2fb; --seq-250:#86b6ef; --seq-400:#3987e5; --seq-550:#1c5cab; --seq-700:#0d366b;
+    --good:#0ca30c; --warning:#c98200; --serious:#c96435; --critical:#d03b3b;
+    --good-soft:#e3f5e0; --warning-soft:#fbedcf; --serious-soft:#fbe1d3; --critical-soft:#f9dcdc;
+    --grid:#e6e2d6; --grid-strong:#cfc9b8;
+    --shadow: 0 1px 2px rgba(27,26,23,0.06), 0 6px 20px -8px rgba(27,26,23,0.12);
+    --font-display:'Fraunces',Georgia,'Times New Roman',serif;
+    --font-body:'Public Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    --font-mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+    color-scheme:light;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#121212; --surface:#1B1B19; --surface-2:#201F1C; --surface-3:#2A2925;
+      --ink:#F2F0EA; --ink-2:#C3C0B4; --ink-3:#8F8B80;
+      --border:#332F27; --border-strong:#454034;
+      --accent:#FF6FA3; --accent-ink:#2B0F1A; --accent-soft:rgba(255,111,163,0.14); --accent-soft-border:rgba(255,111,163,0.38);
+      --cat-1:#3987e5; --cat-2:#d95926; --cat-3:#199e70; --cat-4:#c98500; --cat-5:#d55181; --cat-6:#3fb53f; --cat-7:#9085e9; --cat-8:#e66767;
+      --good:#0ca30c; --warning:#fab219; --serious:#ec835a; --critical:#e66767;
+      --good-soft:rgba(12,163,12,0.16); --warning-soft:rgba(250,178,25,0.16); --serious-soft:rgba(236,131,90,0.16); --critical-soft:rgba(230,103,103,0.18);
+      --grid:#2c2b26; --grid-strong:#413d33;
+      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -8px rgba(0,0,0,0.5);
+      color-scheme:dark;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#121212; --surface:#1B1B19; --surface-2:#201F1C; --surface-3:#2A2925;
+    --ink:#F2F0EA; --ink-2:#C3C0B4; --ink-3:#8F8B80;
+    --border:#332F27; --border-strong:#454034;
+    --accent:#FF6FA3; --accent-ink:#2B0F1A; --accent-soft:rgba(255,111,163,0.14); --accent-soft-border:rgba(255,111,163,0.38);
+    --cat-1:#3987e5; --cat-2:#d95926; --cat-3:#199e70; --cat-4:#c98500; --cat-5:#d55181; --cat-6:#3fb53f; --cat-7:#9085e9; --cat-8:#e66767;
+    --good:#0ca30c; --warning:#fab219; --serious:#ec835a; --critical:#e66767;
+    --good-soft:rgba(12,163,12,0.16); --warning-soft:rgba(250,178,25,0.16); --serious-soft:rgba(236,131,90,0.16); --critical-soft:rgba(230,103,103,0.18);
+    --grid:#2c2b26; --grid-strong:#413d33;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -8px rgba(0,0,0,0.5);
+    color-scheme:dark;
+  }
+
+  *{box-sizing:border-box;}
+  body{background:var(--bg);color:var(--ink);font-family:var(--font-body);margin:0;}
+  ::selection{background:var(--accent-soft);}
+  h1,h2,h3{font-family:var(--font-display);font-weight:600;margin:0;text-wrap:balance;}
+  .num{font-family:var(--font-mono);font-variant-numeric:tabular-nums;}
+  a{color:var(--accent);}
+  button{font-family:var(--font-body);}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+
+  .app{max-width:1280px;margin:0 auto;padding:0 20px 64px;}
+
+  /* ---------- topbar ---------- */
+  .topbar{position:sticky;top:0;z-index:20;background:var(--bg);padding:22px 20px 0;border-bottom:1px solid var(--border);}
+  .topbar-inner{max-width:1280px;margin:0 auto;}
+  .eyebrow{font-size:11.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);font-weight:600;}
+  .title-row{display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-top:4px;}
+  h1{font-size:26px;}
+  .meta{font-size:12.5px;color:var(--ink-3);font-family:var(--font-mono);}
+  .tabs{display:flex;gap:4px;margin-top:18px;overflow-x:auto;}
+  .tab{font-family:var(--font-body);font-weight:600;font-size:13.5px;color:var(--ink-2);background:none;border:none;padding:10px 14px;border-radius:8px 8px 0 0;cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;}
+  .tab:hover{color:var(--ink);background:var(--surface-2);}
+  .tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+
+  .global-filter{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:14px 0 16px;padding:10px 12px;background:var(--surface-2);border:1px solid var(--border);border-radius:9px;}
+  .global-filter.active{background:var(--accent-soft);border-color:var(--accent-soft-border);}
+  .gf-label{font-size:11.5px;font-weight:600;color:var(--ink-2);text-transform:uppercase;letter-spacing:.05em;white-space:nowrap;}
+  .gf-hint{font-size:11.5px;color:var(--ink-3);margin-left:auto;}
+  @media (max-width:700px){.gf-hint{display:none;}}
+
+  .seg{display:inline-flex;border:1px solid var(--border-strong);border-radius:8px;overflow:hidden;flex:none;}
+  .seg button{font-family:var(--font-body);background:var(--surface);border:none;padding:6px 13px;font-size:12.5px;font-weight:600;color:var(--ink-2);cursor:pointer;}
+  .seg button:not(:last-child){border-right:1px solid var(--border-strong);}
+  .seg button.active{background:var(--accent);color:var(--accent-ink);}
+  .seg button:hover:not(.active){background:var(--surface-2);}
+
+  .panel{display:none;padding-top:24px;}
+  .panel.active{display:block;}
+
+  section{margin-bottom:36px;}
+  .section-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:14px;flex-wrap:wrap;}
+  .section-head h2{font-size:19px;}
+  .section-sub{font-size:13px;color:var(--ink-3);margin-top:3px;max-width:62ch;}
+
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow);}
+  .pad{padding:18px 20px;}
+
+  /* ---------- kpi tiles ---------- */
+  .kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(168px,1fr));gap:10px;}
+  .kpi{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px;box-shadow:var(--shadow);}
+  .kpi .label{font-size:11.5px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.06em;font-weight:600;}
+  .kpi .value{font-family:var(--font-mono);font-size:26px;font-weight:600;margin-top:6px;letter-spacing:-0.01em;}
+  .kpi .sub{font-size:12px;color:var(--ink-2);margin-top:3px;}
+  .kpi.accent{background:var(--accent-soft);border-color:var(--accent-soft-border);}
+  .kpi.accent .value{color:var(--accent);}
+
+  /* ---------- funnel ---------- */
+  .funnel{display:flex;flex-direction:column;gap:2px;}
+  .funnel-row{display:grid;grid-template-columns:150px 1fr 118px;align-items:center;gap:10px;padding:6px 0;}
+  .funnel-label{font-size:12.5px;color:var(--ink-2);font-weight:600;}
+  .funnel-track{position:relative;height:22px;background:var(--surface-2);border-radius:5px;overflow:hidden;}
+  .funnel-fill{position:absolute;left:0;top:0;bottom:0;border-radius:5px;transition:width .4s ease;}
+  .funnel-num{font-family:var(--font-mono);font-size:12.5px;text-align:right;color:var(--ink-2);white-space:nowrap;}
+  .funnel-num b{color:var(--ink);font-size:13px;}
+
+  .legend{display:flex;flex-wrap:wrap;gap:12px;margin-top:10px;}
+  .legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-2);}
+  .swatch{width:10px;height:10px;border-radius:3px;flex:none;}
+
+  .grid-2{display:grid;grid-template-columns:1.3fr 1fr;gap:16px;}
+  .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+  .grid-auto{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;}
+  @media (max-width:860px){.grid-2,.grid-3{grid-template-columns:1fr;}}
+
+  /* ---------- small multiples ---------- */
+  .mini-funnel h3{font-size:13.5px;}
+  .mini-funnel .funnel-row{grid-template-columns:96px 1fr 74px;padding:4px 0;}
+  .mini-funnel .funnel-track{height:16px;}
+  .mini-funnel .funnel-label{font-size:11px;}
+  .mini-funnel .funnel-num{font-size:11px;}
+
+  /* ---------- queue / hbar chart ---------- */
+  .hbar-row{display:grid;grid-template-columns:200px 1fr 150px;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border);}
+  .hbar-row:last-child{border-bottom:none;}
+  .hbar-label{font-size:12.5px;color:var(--ink);}
+  .hbar-label .arrow{color:var(--ink-3);margin:0 4px;}
+  .hbar-track{position:relative;height:18px;background:var(--surface-2);border-radius:4px;}
+  .hbar-fill{position:absolute;left:0;top:0;bottom:0;border-radius:4px;background:var(--seq-400);}
+  .hbar-p90tick{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--ink);opacity:.55;}
+  .hbar-nums{font-family:var(--font-mono);font-size:11.5px;color:var(--ink-2);text-align:right;white-space:nowrap;}
+  .hbar-nums b{color:var(--ink);}
+
+  /* ---------- pills / chips ---------- */
+  .pill{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:600;padding:3px 9px;border-radius:99px;white-space:nowrap;}
+  .pill .dot{width:6px;height:6px;border-radius:50%;flex:none;}
+  .pill.p-good{background:var(--good-soft);color:var(--good);}
+  .pill.p-warning{background:var(--warning-soft);color:var(--warning);}
+  .pill.p-serious{background:var(--serious-soft);color:var(--serious);}
+  .pill.p-critical{background:var(--critical-soft);color:var(--critical);}
+  .pill.p-neutral{background:var(--surface-2);color:var(--ink-2);}
+
+  /* ---------- tables ---------- */
+  .table-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:10px;}
+  table{border-collapse:collapse;width:100%;font-size:12.8px;}
+  thead th{position:sticky;top:0;background:var(--surface-2);text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-3);font-weight:600;padding:9px 12px;border-bottom:1px solid var(--border-strong);white-space:nowrap;}
+  tbody td{padding:8px 12px;border-bottom:1px solid var(--border);vertical-align:middle;}
+  tbody tr:hover{background:var(--surface-2);}
+  tbody tr:last-child td{border-bottom:none;}
+  td.num,th.num{text-align:right;font-family:var(--font-mono);}
+  .card-name{max-width:360px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block;}
+  #tbl-consulta td:nth-child(2){max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .row-link{color:var(--ink-2);}
+  .row-link:hover{color:var(--accent);}
+
+  /* ---------- controls ---------- */
+  .toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px;}
+  select,input[type=search]{font-family:var(--font-body);font-size:12.8px;background:var(--surface);color:var(--ink);border:1px solid var(--border-strong);border-radius:7px;padding:7px 10px;}
+  input[type=search]{min-width:220px;flex:1;}
+  .btn{font-size:12.8px;font-weight:600;background:var(--surface);color:var(--ink);border:1px solid var(--border-strong);border-radius:7px;padding:7px 12px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;}
+  .btn:hover{background:var(--surface-2);}
+  .btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);}
+  .btn.primary:hover{filter:brightness(1.06);}
+  .btn:disabled{opacity:.5;cursor:not-allowed;}
+  .spacer{flex:1;}
+  .pager{display:flex;align-items:center;gap:10px;margin-top:12px;font-size:12.5px;color:var(--ink-2);}
+
+  .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);font-size:13px;padding:10px 16px;border-radius:8px;box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:opacity .25s ease, transform .25s ease;z-index:50;}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(-4px);}
+
+  .callout{border-radius:10px;padding:12px 14px;font-size:13px;line-height:1.5;border:1px solid var(--accent-soft-border);background:var(--accent-soft);color:var(--ink);}
+  .callout b{color:var(--accent);}
+
+  .foot-note{font-size:11.5px;color:var(--ink-3);margin-top:10px;line-height:1.5;}
+
+  @media (prefers-reduced-motion: reduce){ *{transition:none !important;} }
+</style>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="eyebrow">Afya · Produção de Conteúdo &amp; Vídeo EAD</div>
+    <div class="title-row">
+      <h1>Painel da Esteira</h1>
+      <div class="meta" id="meta-line">—</div>
+    </div>
+    <nav class="tabs" id="tabs">
+      <button class="tab active" data-tab="visao">Visão Geral</button>
+      <button class="tab" data-tab="conteudo">Esteira de Conteúdo</button>
+      <button class="tab" data-tab="bdq">Banco de Questões</button>
+      <button class="tab" data-tab="video">Esteira de Vídeo</button>
+      <button class="tab" data-tab="ritmo">Ritmo &amp; Backlog</button>
+      <button class="tab" data-tab="produtividade">Produtividade</button>
+      <button class="tab" data-tab="funcoes">Funções</button>
+      <button class="tab" data-tab="extras">Cards Extras</button>
+      <button class="tab" data-tab="consulta">Consultar Cards</button>
+    </nav>
+    <div class="global-filter" id="global-filter">
+      <span class="gf-label">Filtros</span>
+      <select id="gf-disciplina" aria-label="Filtrar por código ou disciplina"><option value="">Código / disciplina — todas</option></select>
+      <select id="gf-unidade" aria-label="Filtrar por unidade"><option value="">Unidade — todas</option></select>
+      <button class="btn" id="gf-clear" style="display:none">Limpar filtros</button>
+      <span class="gf-hint">Aplicam-se a todas as abas do painel.</span>
+    </div>
+  </div>
+</div>
+
+<div class="app">
+
+  <!-- ===================== VISÃO GERAL ===================== -->
+  <div class="panel active" id="panel-visao">
+    <section>
+      <div class="kpi-grid" id="kpi-visao"></div>
+    </section>
+
+    <section>
+      <div class="section-head">
+        <h2>Cards ativos por fase — Conteúdo vs. Vídeo</h2>
+        <div class="section-sub">Situação atual (cards não arquivados), agrupada nas macro-fases do fluxo de produção.</div>
+      </div>
+      <div class="card pad" id="wip-macro"></div>
+    </section>
+
+    <section>
+      <div class="grid-2">
+        <div>
+          <div class="section-head"><h2>Disciplinas com mais pendências</h2></div>
+          <div class="card pad" id="disc-pendentes"></div>
+        </div>
+        <div>
+          <div class="section-head"><h2>Cards parados há mais tempo</h2></div>
+          <div class="card pad" id="top-parados-mini"></div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ===================== ESTEIRA DE CONTEÚDO ===================== -->
+  <div class="panel" id="panel-conteudo">
+    <section>
+      <div class="section-head">
+        <h2>Funil — Tema (fluxo completo)</h2>
+        <div class="section-sub">Cards do tipo Tema (T2/T3/T4), únicos que passam pelas 8 etapas de qualidade e revisão do conteúdo textual. Cada barra é dividida por unidade.</div>
+      </div>
+      <div class="card pad"><div class="funnel" id="funil-tema"></div><div class="legend" id="funil-tema-legend"></div></div>
+    </section>
+
+    <section>
+      <div class="section-head">
+        <h2>Objetos de aprendizagem por tipo</h2>
+        <div class="section-sub">Plano de Ensino, Infográfico, Quiz e Podcast seguem um fluxo mais curto (sem DI / Tester DI). O Banco de Questões tem quadro próprio na aba "Banco de Questões". Cada barra é dividida por unidade.</div>
+      </div>
+      <div class="grid-auto" id="funil-objetos"></div>
+      <div class="legend" id="funil-objetos-legend" style="margin-top:12px"></div>
+    </section>
+
+    <section>
+      <div class="grid-2">
+        <div>
+          <div class="section-head"><h2>Onde os cards ficam parados</h2><div class="section-sub">Tempo de fila entre o fim de uma etapa e o início da próxima (mediana e p90, em dias) — Tema.</div></div>
+          <div class="card pad" id="filas-conteudo"></div>
+        </div>
+        <div>
+          <div class="section-head"><h2>Tema — conclusão por unidade</h2></div>
+          <div class="card pad" id="tema-unidade"></div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ===================== BANCO DE QUESTÕES ===================== -->
+  <div class="panel" id="panel-bdq">
+    <section>
+      <div class="section-head">
+        <h2>Banco de Questões (BDQ)</h2>
+        <div class="section-sub">Quadro próprio: o BDQ tem um fluxo muito mais curto que os outros objetos — vai direto do recebimento para a publicação (Web), sem qualidade, revisão ou DG registrados.</div>
+      </div>
+      <div class="kpi-grid" id="kpi-bdq"></div>
+    </section>
+    <section>
+      <div class="grid-2">
+        <div>
+          <div class="section-head"><h2>Publicação por unidade</h2></div>
+          <div class="card pad" id="bdq-unidade"></div>
+        </div>
+        <div>
+          <div class="section-head"><h2>Onde estão hoje (cards ativos)</h2></div>
+          <div class="card pad" id="bdq-wip"></div>
+        </div>
+      </div>
+    </section>
+    <section>
+      <div class="section-head">
+        <h2>BDQ pendentes de publicação</h2>
+        <button class="btn" id="export-bdq">Exportar CSV</button>
+      </div>
+      <div class="table-wrap"><table id="tbl-bdq"><thead><tr>
+        <th>Card</th><th>Disciplina</th><th>Unidade</th><th>Etapa atual</th><th class="num">Dias parado</th><th></th>
+      </tr></thead><tbody></tbody></table></div>
+    </section>
+  </div>
+
+  <!-- ===================== ESTEIRA DE VÍDEO ===================== -->
+  <div class="panel" id="panel-video">
+    <section>
+      <div class="section-head">
+        <h2>Funil por formato de vídeo</h2>
+        <div class="section-sub">Conceituando (CONC), Prática em Evidência (PEV) e EADúvida (EDUV) — mesmo fluxo de produção. Cada barra é dividida por unidade.</div>
+      </div>
+      <div class="grid-3" id="funil-video"></div>
+      <div class="legend" id="funil-video-legend" style="margin-top:12px"></div>
+      <div class="foot-note" id="funil-video-note" style="margin-top:6px"></div>
+    </section>
+
+    <section>
+      <div class="grid-2">
+        <div>
+          <div class="section-head"><h2>Onde os vídeos ficam parados</h2><div class="section-sub">Tempo de fila entre etapas (mediana e p90, em dias).</div></div>
+          <div class="card pad" id="filas-video"></div>
+        </div>
+        <div>
+          <div class="section-head"><h2>Vídeo — conclusão por unidade</h2></div>
+          <div class="card pad" id="video-unidade"></div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-head"><h2>Dependência de conteudista externo</h2></div>
+      <div class="card pad" id="dependencia-externa"></div>
+    </section>
+  </div>
+
+  <!-- ===================== RITMO & BACKLOG ===================== -->
+  <div class="panel" id="panel-ritmo">
+    <section>
+      <div class="section-head">
+        <h2>Ritmo de entrega — cards finalizados por semana</h2>
+        <div class="section-sub">Data de conclusão do Tester de Conteúdo (última etapa antes da publicação), por semana.</div>
+      </div>
+      <div class="card pad"><div id="throughput-chart"></div></div>
+    </section>
+
+    <section>
+      <div class="section-head">
+        <h2>Envelhecimento do backlog ativo</h2>
+        <div class="section-sub">Dias desde a última atividade nos cards ainda não arquivados, por macro-fase.</div>
+      </div>
+      <div class="card pad" id="aging-chart"></div>
+    </section>
+
+    <section>
+      <div class="section-head">
+        <h2>Top 25 cards mais parados</h2>
+        <button class="btn" id="export-parados">Exportar CSV</button>
+      </div>
+      <div class="table-wrap"><table id="tbl-parados"><thead><tr>
+        <th>Card</th><th>Pipeline</th><th>Etapa atual</th><th class="num">Dias parado</th><th></th>
+      </tr></thead><tbody></tbody></table></div>
+    </section>
+  </div>
+
+  <!-- ===================== PRODUTIVIDADE ===================== -->
+  <div class="panel" id="panel-produtividade">
+    <section>
+      <div class="section-head">
+        <h2>Produtividade por equipe e pessoa</h2>
+        <div class="section-sub">Baseado no campo "responsável" de cada etapa concluída (não no campo Members, que é uma lista livre de envolvidos) — cobre as 12 etapas com data de conclusão registrada.</div>
+      </div>
+      <div class="kpi-grid" id="kpi-produtividade"></div>
+    </section>
+
+    <section>
+      <div class="section-head"><h2>Ritmo semanal por equipe</h2><div class="section-sub">Etapas concluídas por semana (últimas 16 semanas).</div></div>
+      <div class="card pad"><div id="produtividade-chart"></div></div>
+    </section>
+
+    <section>
+      <div class="grid-2">
+        <div>
+          <div class="section-head"><h2>Por equipe</h2></div>
+          <div class="table-wrap"><table id="tbl-equipes"><thead><tr>
+            <th>Equipe</th><th class="num">Pessoas</th><th class="num">Concluídas (total)</th><th class="num">Últimos 28d</th>
+          </tr></thead><tbody></tbody></table></div>
+        </div>
+        <div>
+          <div class="section-head"><h2>Por pessoa</h2></div>
+          <div class="table-wrap"><table id="tbl-pessoas"><thead><tr>
+            <th>Pessoa</th><th>Equipe</th><th>Etapa principal</th><th class="num">Total</th><th class="num">28d</th>
+          </tr></thead><tbody></tbody></table></div>
+        </div>
+      </div>
+      <div class="foot-note">"Não mapeado" = responsáveis (Jéssica, Rafael) que não constam na composição de equipes que temos registrada. "Externo" = marcado explicitamente como "(EXTERNO)" na coluna de responsável, independente do nome.</div>
+    </section>
+  </div>
+
+  <!-- ===================== FUNÇÕES ===================== -->
+  <div class="panel" id="panel-funcoes">
+    <section>
+      <div class="section-head">
+        <h2>Produtividade por função</h2>
+        <div class="section-sub">Etapas agrupadas por função de trabalho, não por equipe organizacional: Design Gráfico (DG), DI, Qualidade (Qualidade 01/02, Tester DI, Tester Conteúdo), Vídeo — todos (Liberação Conteudista, Gravação, Edição), Revisão (Revisão, Roteiro Revisão) e Webdesign (Web).</div>
+      </div>
+      <div class="kpi-grid" id="kpi-funcoes"></div>
+    </section>
+
+    <section>
+      <div class="section-head">
+        <h2>Histórico</h2>
+        <div class="seg" id="funcao-granularidade">
+          <button class="active" data-g="dia">Dia</button>
+          <button data-g="semana">Semana</button>
+          <button data-g="mes">Mês</button>
+        </div>
+      </div>
+      <div class="section-sub" style="margin-bottom:10px">Etapas concluídas por função, por período. Passe o mouse sobre os pontos para ver o valor exato.</div>
+      <div class="card pad"><div id="funcoes-chart"></div></div>
+    </section>
+
+    <section>
+      <div class="section-head"><h2>Resumo por função</h2></div>
+      <div class="table-wrap"><table id="tbl-funcoes"><thead><tr>
+        <th>Função</th><th class="num">Total</th><th class="num">Últ. 7 dias</th><th class="num">Últ. 28 dias</th><th>Tendência (7d)</th><th>Etapa principal</th><th>Destaque</th>
+      </tr></thead><tbody></tbody></table></div>
+      <div class="foot-note">Tendência compara os últimos 7 dias com os 7 dias imediatamente anteriores.</div>
+    </section>
+
+    <section>
+      <div class="section-head">
+        <h2>Composição por etapa</h2>
+        <div class="section-sub">O que compõe cada função, etapa a etapa.</div>
+      </div>
+      <div class="grid-auto" id="funcoes-composicao"></div>
+    </section>
+  </div>
+
+  <!-- ===================== CARDS EXTRAS ===================== -->
+  <div class="panel" id="panel-extras">
+    <section>
+      <div class="section-head">
+        <h2>Cards Extras</h2>
+        <div class="section-sub">Cards que não seguem o padrão GRD2026.2_Unidade_Tipo_Código_Disciplina: outro projeto (SOI2026.2), documentos internos (DMD), modelos/testes e itens avulsos.</div>
+      </div>
+      <div class="kpi-grid" id="kpi-extras"></div>
+    </section>
+    <section>
+      <div class="toolbar">
+        <select id="f-extra-grupo"><option value="">Todos os grupos</option></select>
+        <span class="spacer"></span>
+        <button class="btn" id="export-extras">Exportar CSV</button>
+      </div>
+      <div class="table-wrap"><table id="tbl-extras"><thead><tr>
+        <th>Card</th><th>Grupo</th><th>Etapa atual</th><th>Status</th><th></th>
+      </tr></thead><tbody></tbody></table></div>
+    </section>
+  </div>
+
+  <!-- ===================== CONSULTAR CARDS ===================== -->
+  <div class="panel" id="panel-consulta">
+    <section>
+      <div class="section-head">
+        <h2>Consultar Cards</h2>
+        <div class="section-sub" id="consulta-count">—</div>
+      </div>
+      <div class="toolbar">
+        <input type="search" id="f-texto" placeholder="Buscar por nome, código ou disciplina…">
+        <select id="f-pipeline"><option value="">Todas as esteiras</option></select>
+        <select id="f-tipo"><option value="">Todos os tipos</option></select>
+        <select id="f-fase"><option value="">Todas as macro-fases</option></select>
+        <select id="f-status"><option value="">Ativos e arquivados</option><option value="ativo">Somente ativos</option><option value="arquivado">Somente arquivados</option></select>
+        <span class="spacer"></span>
+        <button class="btn primary" id="export-consulta">Exportar CSV (filtrado)</button>
+      </div>
+      <div class="table-wrap"><table id="tbl-consulta"><thead><tr>
+        <th>Card</th><th>Disciplina</th><th>Unidade</th><th>Tipo</th><th>Pipeline</th><th>Etapa atual</th><th>Status</th><th class="num">Dias parado</th>
+      </tr></thead><tbody></tbody></table></div>
+      <div class="pager">
+        <button class="btn" id="pg-prev">← Anterior</button>
+        <span id="pg-info"></span>
+        <button class="btn" id="pg-next">Próxima →</button>
+      </div>
+    </section>
+  </div>
+
+  <p class="foot-note">
+    Painel gerado a partir do export CSV do Trello (board "Esteira Produção Disciplinas"), sem depender do Power BI. Metodologia própria: os funis por tipo refletem apenas as etapas realmente percorridas por cada tipo de card; tempos de fila medem o intervalo entre o fim de uma etapa e o início da seguinte. Números podem divergir ligeiramente de outros painéis por critérios de corte (cards arquivados, cards de teste/modelo).
+  </p>
+</div>
+
+<div class="toast" id="toast"></div>
+
+
+<script>
+(function(){
+  "use strict";
+  function init(DATA){
+  var fmt = new Intl.NumberFormat('pt-BR');
+  var fmt1 = new Intl.NumberFormat('pt-BR',{maximumFractionDigits:1,minimumFractionDigits:1});
+  function n(x){ return (x===null||x===undefined||isNaN(x)) ? '—' : fmt.format(x); }
+  function d1(x){ return (x===null||x===undefined||isNaN(x)) ? '—' : fmt1.format(x); }
+  function pct(x){ return (x===null||x===undefined) ? '—' : fmt1.format(x)+'%'; }
+  function esc(s){ return (s===null||s===undefined) ? '' : String(s).replace(/[&<>"']/g, function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+
+  var CAT = {
+    tipo: {TEMA:'var(--cat-1)', INF:'var(--cat-2)', QUIZ:'var(--cat-3)', POD:'var(--cat-4)', PE:'var(--cat-5)'},
+    video: {CONC:'var(--cat-1)', PEV:'var(--cat-2)', EDUV:'var(--cat-3)'},
+    pipeline: {conteudo:'var(--cat-1)', video:'var(--cat-2)', bdq:'var(--cat-5)', extras:'var(--ink-3)'},
+    equipe: {'Desenho Educacional':'var(--cat-1)', 'Soluções Educacionais':'var(--cat-2)', 'Design e Mídia Digital':'var(--cat-3)', 'Externo':'var(--cat-8)', 'Não mapeado':'var(--ink-3)'}
+  };
+  var PIPE_LABEL = {conteudo:'Conteúdo', video:'Vídeo', bdq:'Banco de Questões', extras:'Extras'};
+  var TIPO_LABEL = {TEMA:'Tema', INF:'Infográfico', QUIZ:'Quiz', POD:'Podcast', PE:'Plano de Ensino', BDQ:'Banco de Questões', CONC:'Conceituando', PEV:'Prática em Evidência', EDUV:'EADúvida'};
+  var UNIDADE_LABEL = {'1':'Unidade 1', '2':'Unidade 2', '3':'Unidade 3', '4':'Unidade 4', 'PE':'Plano de Ensino'};
+  var UNIT_COLOR = {'1':'var(--cat-1)', '2':'var(--cat-2)', '3':'var(--cat-3)', '4':'var(--cat-4)'};
+  var UNIT_LEGEND = ['1','2','3','4'].map(function(u){ return '<span class="legend-item"><span class="swatch" style="background:'+UNIT_COLOR[u]+'"></span>Unidade '+u+'</span>'; }).join('');
+
+  // ---------------- stage definitions (mirror build_data.py *_STAGES, labels only) ----------------
+  var STAGE_DEFS = {
+    TEMA:  ['Recebimento','Qualidade 01','Qualidade 02','DI','Tester DI','Revisão','DG','Web','Tester Conteúdo'],
+    OBJ:   ['Recebimento','Qualidade 02','Revisão','DG','Web','Tester Conteúdo'],
+    VIDEO: ['Recebimento','Roteiro','Liberação Conteudista','Gravação','Edição','Web','Tester Conteúdo'],
+    BDQ:   ['Recebimento','Web (publicado)']
+  };
+
+  // ---------------- math helpers ----------------
+  function median(sorted){
+    var nn = sorted.length; if(!nn) return null;
+    var mid = Math.floor(nn/2);
+    return nn%2 ? sorted[mid] : (sorted[mid-1]+sorted[mid])/2;
+  }
+  function percentile(sorted, p){
+    var nn = sorted.length; if(!nn) return null;
+    var idx = p*(nn-1), lo = Math.floor(idx), hi = Math.ceil(idx);
+    if(lo===hi) return sorted[lo];
+    return sorted[lo] + (sorted[hi]-sorted[lo])*(idx-lo);
+  }
+  function round1(x){ return (x===null||x===undefined) ? null : Math.round(x*10)/10; }
+  function statsOf(diffs){
+    if(!diffs.length) return null;
+    var sorted = diffs.slice().sort(function(a,b){return a-b;});
+    var sum = 0; for(var i=0;i<sorted.length;i++) sum += sorted[i];
+    return {n:sorted.length, mediana:round1(median(sorted)), p90:round1(percentile(sorted,0.9)), media:round1(sum/sorted.length)};
+  }
+  function daysBetween(a,b){ return (new Date(b) - new Date(a)) / 86400000; }
+  function weekStartMonday(d){
+    var dt = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
+    var day = dt.getUTCDay();
+    var diff = (day===0 ? -6 : 1-day);
+    dt.setUTCDate(dt.getUTCDate()+diff);
+    return dt.toISOString().slice(0,10);
+  }
+
+  // ---------------- aggregation engine — everything derives from a cards[] subset ----------------
+  function buildFunnel(cards, stageLabels){
+    var total = cards.length;
+    var etapas = stageLabels.map(function(label, i){
+      var cnt = i===0 ? total : cards.filter(function(c){ return c.stages && c.stages[label] && c.stages[label].fim; }).length;
+      return {etapa:label, n:cnt, pct: total ? round1(100*cnt/total) : 0};
+    });
+    return {total:total, etapas:etapas};
+  }
+  function buildQueueChain(cards, stageLabels){
+    var real = stageLabels.slice(1), out = [];
+    for(var i=0;i<real.length-1;i++){
+      var labelA = real[i], labelB = real[i+1], diffs = [];
+      cards.forEach(function(c){
+        var a = c.stages && c.stages[labelA] && c.stages[labelA].fim;
+        var b = c.stages && c.stages[labelB] && c.stages[labelB].ini;
+        if(a && b){ var d = daysBetween(a,b); diffs.push(d<0?0:d); }
+      });
+      var st = statsOf(diffs);
+      if(st) out.push({de:labelA, para:labelB, n:st.n, mediana:st.mediana, p90:st.p90, media:st.media});
+    }
+    return out;
+  }
+  function leadTimeOf(cards, stageLabels){
+    var real = stageLabels.slice(1); if(!real.length) return null;
+    var first = real[0], last = real[real.length-1], diffs = [];
+    cards.forEach(function(c){
+      var s = c.stages && c.stages[first] && c.stages[first].ini;
+      var e = c.stages && c.stages[last] && c.stages[last].fim;
+      if(s && e){ var d = daysBetween(s,e); diffs.push(d<0?0:d); }
+    });
+    return statsOf(diffs);
+  }
+  function unitBreakdown(cards, stageLabels, funnelFn){
+    funnelFn = funnelFn || buildFunnel;
+    return ['1','2','3','4'].map(function(u){
+      var sub = cards.filter(function(c){ return c.unidade_num===u; });
+      var f = funnelFn(sub, stageLabels);
+      return {unidade:'Unidade '+u, unidade_num:u, total:f.total, etapas:f.etapas};
+    });
+  }
+  // Vídeo: se o card já alcançou uma etapa posterior, considera as etapas anteriores concluídas
+  // para fins de visualização do funil, mesmo que a data daquela etapa específica não tenha sido
+  // registrada (ex.: Web já finalizada, Liberação Conteudista sem DT FIM preenchida).
+  function furthestStageIndex(card, stageLabels){
+    var idx = 0;
+    for(var i=1;i<stageLabels.length;i++){
+      if(card.stages && card.stages[stageLabels[i]] && card.stages[stageLabels[i]].fim) idx = i;
+    }
+    return idx;
+  }
+  function buildFunnelFlow(cards, stageLabels){
+    var total = cards.length;
+    var furthest = cards.map(function(c){ return furthestStageIndex(c, stageLabels); });
+    var etapas = stageLabels.map(function(label, i){
+      var cnt = i===0 ? total : furthest.filter(function(f){ return f>=i; }).length;
+      return {etapa:label, n:cnt, pct: total ? round1(100*cnt/total) : 0};
+    });
+    return {total:total, etapas:etapas};
+  }
+  // Mesmo funil, mas cada etapa é dividida por unidade (1-4) — para colorir o funil por unidade.
+  function buildFunnelByUnit(cards, stageLabels, forwardFill){
+    var funnelFn = forwardFill ? buildFunnelFlow : buildFunnel;
+    var total = cards.length;
+    var perUnit = {};
+    ['1','2','3','4'].forEach(function(u){
+      var sub = cards.filter(function(c){ return c.unidade_num===u; });
+      perUnit[u] = funnelFn(sub, stageLabels).etapas;
+    });
+    var etapas = stageLabels.map(function(label, i){
+      var segs = ['1','2','3','4'].map(function(u){ return {unidade:u, n: perUnit[u][i] ? perUnit[u][i].n : 0}; });
+      var cnt = segs.reduce(function(a,s){ return a+s.n; }, 0);
+      return {etapa:label, n:cnt, pct: total ? round1(100*cnt/total) : 0, segs:segs};
+    });
+    return {total:total, etapas:etapas};
+  }
+  function agingBucketOf(d){
+    if(d===null||d===undefined) return 'N/D';
+    if(d<=2) return '0-2 dias';
+    if(d<=7) return '3-7 dias';
+    if(d<=15) return '8-15 dias';
+    if(d<=30) return '16-30 dias';
+    return '30+ dias';
+  }
+  function buildAgingByPhase(cards){
+    var order = ['Intake','Produção Conteúdo','Produção Vídeo','Publicação'];
+    var buckets = ['0-2 dias','3-7 dias','8-15 dias','16-30 dias','30+ dias'];
+    var by = {}; order.forEach(function(o){ by[o]={}; buckets.forEach(function(b){ by[o][b]=0; }); });
+    cards.forEach(function(c){
+      if(c.arquivado || c.template_teste) return;
+      if(!by[c.macro_fase]) return;
+      var b = agingBucketOf(c.dias_parado);
+      if(buckets.indexOf(b)===-1) return;
+      by[c.macro_fase][b]++;
+    });
+    return {order:order, buckets:buckets, by:by};
+  }
+  function topParados(cards, limit){
+    return cards.filter(function(c){ return !c.arquivado && !c.template_teste; })
+      .slice().sort(function(a,b){ return (b.dias_parado||0)-(a.dias_parado||0); })
+      .slice(0, limit);
+  }
+  function extrasByGroup(cards){
+    var counts = {};
+    cards.forEach(function(c){ if(c.pipeline==='extras'){ counts[c.grupo_extra]=(counts[c.grupo_extra]||0)+1; } });
+    return Object.keys(counts).map(function(k){ return {grupo_extra:k, n:counts[k]}; }).sort(function(a,b){ return b.n-a.n; });
+  }
+  // Conteudista (interno/externo) é um atributo da DISCIPLINA, não do card — uma mesma disciplina
+  // não deveria ter os dois. Conta por disciplina; quando cards da mesma disciplina divergem
+  // (erro de preenchimento), resolve pela classificação mais frequente entre eles.
+  function dependenciaExterna(cards){
+    var byDisc = {}, discsComVideo = {};
+    cards.forEach(function(c){
+      if(c.template_teste || c.pipeline!=='video' || !c.codigo) return;
+      discsComVideo[c.codigo] = true;
+      var v = c.tipo_conteudista;
+      if(!v) return;
+      if(!byDisc[c.codigo]) byDisc[c.codigo] = {};
+      byDisc[c.codigo][v] = (byDisc[c.codigo][v]||0)+1;
+    });
+    var counts = {INTERNO:0, EXTERNO:0}, conflitos = 0, semClassificacao = 0;
+    Object.keys(discsComVideo).forEach(function(codigo){
+      var vals = byDisc[codigo];
+      if(!vals){ semClassificacao++; return; }
+      var keys = Object.keys(vals);
+      if(keys.length>1) conflitos++;
+      var winner = keys.length>1 ? ((vals.INTERNO||0)>=(vals.EXTERNO||0)?'INTERNO':'EXTERNO') : keys[0];
+      counts[winner] = (counts[winner]||0)+1;
+    });
+    return {INTERNO:counts.INTERNO, EXTERNO:counts.EXTERNO, conflitos:conflitos, semClassificacao:semClassificacao, totalDisciplinas:Object.keys(discsComVideo).length};
+  }
+  function throughputSemanal(cards){
+    var counts = {};
+    cards.forEach(function(c){
+      if(c.template_teste || !c.data_conclusao) return;
+      var key = weekStartMonday(new Date(c.data_conclusao))+'|'+c.pipeline;
+      counts[key] = (counts[key]||0)+1;
+    });
+    return Object.keys(counts).map(function(k){ var p=k.split('|'); return {semana:p[0], pipeline:p[1], n:counts[k]}; });
+  }
+  function wipByMacro(cards){
+    var counts = {};
+    cards.forEach(function(c){
+      if(c.arquivado || c.template_teste) return;
+      var key = c.pipeline+'|'+c.macro_fase;
+      counts[key] = (counts[key]||0)+1;
+    });
+    return Object.keys(counts).map(function(k){ var p=k.split('|'); return {pipeline:p[0], macro_fase:p[1], n:counts[k]}; });
+  }
+  function bdqWip(cards){
+    var counts = {};
+    cards.forEach(function(c){
+      if(c.pipeline!=='bdq' || c.arquivado || c.template_teste) return;
+      counts[c.etapa_atual] = (counts[c.etapa_atual]||0)+1;
+    });
+    return Object.keys(counts).map(function(k){ return {etapa_atual:k, n:counts[k]}; }).sort(function(a,b){ return b.n-a.n; });
+  }
+  var SNAPSHOT_DATE = DATA.meta.snapshot_ate ? new Date(DATA.meta.snapshot_ate) : new Date();
+  function buildProdutividade(cards){
+    var events = [];
+    cards.forEach(function(c){
+      if(c.template_teste) return;
+      (c.resp_stages||[]).forEach(function(ev){ events.push({pessoa:ev.pessoa, equipe:ev.equipe, etapa:ev.etapa, data:ev.data}); });
+    });
+    var cutoff = new Date(SNAPSHOT_DATE.getTime() - 28*86400000);
+    var byPessoa = {};
+    events.forEach(function(e){
+      var key = e.pessoa+'|'+e.equipe;
+      if(!byPessoa[key]) byPessoa[key] = {pessoa:e.pessoa, equipe:e.equipe, total_concluidas:0, ultimos_28d:0, etapas:{}};
+      var p = byPessoa[key];
+      p.total_concluidas++;
+      if(new Date(e.data) >= cutoff) p.ultimos_28d++;
+      p.etapas[e.etapa] = (p.etapas[e.etapa]||0)+1;
+    });
+    var pessoas = Object.keys(byPessoa).map(function(k){
+      var p = byPessoa[k], principal=null, mx=-1;
+      Object.keys(p.etapas).forEach(function(et){ if(p.etapas[et]>mx){ mx=p.etapas[et]; principal=et; } });
+      p.etapa_principal = principal;
+      return p;
+    }).sort(function(a,b){ return b.total_concluidas-a.total_concluidas; });
+    var byEquipe = {};
+    events.forEach(function(e){
+      if(!byEquipe[e.equipe]) byEquipe[e.equipe] = {equipe:e.equipe, pessoasSet:{}, total_concluidas:0, ultimos_28d:0};
+      var eq = byEquipe[e.equipe];
+      eq.total_concluidas++; eq.pessoasSet[e.pessoa]=true;
+      if(new Date(e.data) >= cutoff) eq.ultimos_28d++;
+    });
+    var equipes = Object.keys(byEquipe).map(function(k){
+      var eq = byEquipe[k];
+      return {equipe:eq.equipe, pessoas:Object.keys(eq.pessoasSet).length, total_concluidas:eq.total_concluidas, ultimos_28d:eq.ultimos_28d};
+    }).sort(function(a,b){ return b.total_concluidas-a.total_concluidas; });
+    var weekCounts = {};
+    events.forEach(function(e){
+      var key = weekStartMonday(new Date(e.data))+'|'+e.equipe;
+      weekCounts[key] = (weekCounts[key]||0)+1;
+    });
+    var produtividade_semanal = Object.keys(weekCounts).map(function(k){ var p=k.split('|'); return {semana:p[0], equipe:p[1], n:weekCounts[k]}; });
+    return {pessoas:pessoas, equipes:equipes, produtividade_semanal:produtividade_semanal, totalEventos:events.length};
+  }
+
+  // ---------------- global filters: código/disciplina + unidade (apply to every panel) ----------------
+  var currentDiscipline = '';
+  var currentUnidade = '';
+  var ALL_CARDS = DATA.cards;
+  function scopedCards(){
+    return ALL_CARDS.filter(function(c){
+      if(currentDiscipline && c.codigo!==currentDiscipline) return false;
+      if(currentUnidade && c.unidade_num!==currentUnidade) return false;
+      return true;
+    });
+  }
+  (function(){
+    var selDisc = document.getElementById('gf-disciplina');
+    DATA.disciplinas_lista.forEach(function(d){
+      var opt = document.createElement('option'); opt.value = d.codigo; opt.textContent = d.codigo+' · '+d.nome;
+      selDisc.appendChild(opt);
+    });
+    var selUnid = document.getElementById('gf-unidade');
+    ['1','2','3','4','PE'].forEach(function(u){
+      var opt = document.createElement('option'); opt.value = u; opt.textContent = UNIDADE_LABEL[u];
+      selUnid.appendChild(opt);
+    });
+    var clearBtn = document.getElementById('gf-clear');
+    var bar = document.getElementById('global-filter');
+    function onChange(){
+      currentDiscipline = selDisc.value;
+      currentUnidade = selUnid.value;
+      var active = !!(currentDiscipline || currentUnidade);
+      clearBtn.style.display = active ? '' : 'none';
+      bar.classList.toggle('active', active);
+      renderAll();
+    }
+    selDisc.addEventListener('change', onChange);
+    selUnid.addEventListener('change', onChange);
+    clearBtn.addEventListener('click', function(){
+      selDisc.value = ''; selUnid.value = '';
+      currentDiscipline = ''; currentUnidade = '';
+      clearBtn.style.display = 'none';
+      bar.classList.remove('active');
+      renderAll();
+    });
+  })();
+
+  // ---------------- meta / top bar ----------------
+  function renderMeta(){
+    var m = DATA.meta;
+    var snap = m.snapshot_ate ? new Date(m.snapshot_ate) : null;
+    var txt = 'Base: ' + n(m.total_cards) + ' cards · ' + n(m.total_disciplinas) + ' disciplinas';
+    if(snap) txt += ' · atualizado em ' + snap.toLocaleDateString('pt-BR');
+    var filtros = [];
+    if(currentDiscipline){
+      var d = DATA.disciplinas_lista.filter(function(x){ return x.codigo===currentDiscipline; })[0];
+      filtros.push(d ? (d.codigo+' — '+d.nome) : currentDiscipline);
+    }
+    if(currentUnidade) filtros.push(UNIDADE_LABEL[currentUnidade]);
+    if(filtros.length) txt += ' · filtrado por ' + filtros.join(' · ');
+    document.getElementById('meta-line').textContent = txt;
+  }
+
+  // ---------------- tabs ----------------
+  document.getElementById('tabs').addEventListener('click', function(e){
+    var btn = e.target.closest('.tab'); if(!btn) return;
+    document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});
+    document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('active');});
+    btn.classList.add('active');
+    document.getElementById('panel-'+btn.dataset.tab).classList.add('active');
+  });
+
+  // ---------------- toast ----------------
+  var toastEl = document.getElementById('toast'), toastTimer;
+  function toast(msg){
+    toastEl.textContent = msg; toastEl.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ toastEl.classList.remove('show'); }, 3200);
+  }
+
+  // ---------------- downloads capability ----------------
+  var downloadsNS = null, downloadsChecked = false;
+  function getDownloads(cb){
+    if(!window.claude || !window.claude.use){ cb(null); return; }
+    window.claude.use('downloads').then(function(ns){ downloadsNS = ns; cb(ns); }).catch(function(){ cb(null); });
+  }
+  function toCSV(rows, columns){
+    var lines = [columns.map(function(c){return c.label;}).join(';')];
+    rows.forEach(function(r){
+      lines.push(columns.map(function(c){
+        var v = r[c.key];
+        if(v===null||v===undefined) v='';
+        v = String(v).replace(/"/g,'""');
+        if(/[;"\n]/.test(v)) v = '"'+v+'"';
+        return v;
+      }).join(';'));
+    });
+    return lines.join('\r\n');
+  }
+  function exportCSV(filename, rows, columns){
+    var csv = toCSV(rows, columns);
+    getDownloads(function(ns){
+      if(!ns){
+        // fallback: open a blob in a new context is blocked in the sandbox; copy to clipboard instead
+        if(navigator.clipboard && navigator.clipboard.writeText){
+          navigator.clipboard.writeText(csv).then(function(){
+            toast('Exportação de arquivo indisponível aqui — CSV copiado para a área de transferência.');
+          }).catch(function(){ toast('Não foi possível exportar neste ambiente.'); });
+        } else {
+          toast('Exportação de arquivo indisponível neste ambiente.');
+        }
+        return;
+      }
+      ns.save({filename: filename, data: csv}).then(function(res){
+        toast(res.status === 'saved' ? 'Arquivo salvo: ' + filename : 'Arquivo entregue.');
+      }).catch(function(err){
+        if(err && err.code === 'declined') return;
+        toast('Não foi possível exportar: ' + (err && err.message ? err.message : 'erro desconhecido'));
+      });
+    });
+  }
+
+  function agingSeverity(dias){
+    if(dias===null||dias===undefined) return {c:'p-neutral', l:'—'};
+    if(dias<=2) return {c:'p-good', l:'0–2 dias'};
+    if(dias<=7) return {c:'p-neutral', l:'3–7 dias'};
+    if(dias<=15) return {c:'p-warning', l:'8–15 dias'};
+    if(dias<=30) return {c:'p-serious', l:'16–30 dias'};
+    return {c:'p-critical', l:'30+ dias'};
+  }
+
+  // ================= Visão Geral =================
+  function renderVisaoGeral(cards){
+    var m = DATA.meta;
+    var temaCards = cards.filter(function(c){ return c.pipeline==='conteudo' && c.tipo==='TEMA' && !c.template_teste; });
+    var videoCards = cards.filter(function(c){ return c.pipeline==='video' && !c.template_teste; });
+    var tema = leadTimeOf(temaCards, STAGE_DEFS.TEMA) || {mediana:null,p90:null};
+    var video = leadTimeOf(videoCards, STAGE_DEFS.VIDEO) || {mediana:null,p90:null};
+    var videoQueue = buildQueueChain(videoCards, STAGE_DEFS.VIDEO);
+    var maiorFila = videoQueue.slice().sort(function(a,b){return b.mediana-a.mediana;})[0];
+    var ativos = cards.filter(function(c){ return !c.arquivado && !c.template_teste; }).length;
+    var arquivados = cards.filter(function(c){ return c.arquivado; }).length;
+    var nDisc = currentDiscipline ? 1 : m.total_disciplinas;
+    var tiles = [
+      {label:'Disciplinas', value:n(nDisc), sub: currentDiscipline ? 'selecionada' : 'no ciclo 2026.2'},
+      {label:'Cards ativos', value:n(ativos), sub:n(arquivados)+' arquivados'},
+      {label:'Lead time — Tema', value:d1(tema.mediana)+'d', sub:'mediana · p90 '+d1(tema.p90)+'d'},
+      {label:'Lead time — Vídeo', value:d1(video.mediana)+'d', sub:'mediana · p90 '+d1(video.p90)+'d'},
+      {label:'Maior gargalo', value: maiorFila?(d1(maiorFila.mediana)+'d'):'—', sub: maiorFila?(maiorFila.de+' → '+maiorFila.para):'sem dados suficientes', accent:true},
+    ];
+    document.getElementById('kpi-visao').innerHTML = tiles.map(function(t){
+      return '<div class="kpi'+(t.accent?' accent':'')+'"><div class="label">'+esc(t.label)+'</div><div class="value">'+t.value+'</div><div class="sub">'+esc(t.sub)+'</div></div>';
+    }).join('');
+
+    var order = ['Intake','Produção Conteúdo','Produção Vídeo','Publicação','Concluído'];
+    var byPhase = {};
+    order.forEach(function(o){ byPhase[o] = {conteudo:0, video:0}; });
+    wipByMacro(cards).forEach(function(r){
+      if(r.pipeline!=='conteudo' && r.pipeline!=='video') return;
+      if(!byPhase[r.macro_fase]) byPhase[r.macro_fase] = {conteudo:0, video:0};
+      byPhase[r.macro_fase][r.pipeline] = r.n;
+    });
+    var max = 1;
+    order.forEach(function(o){ max = Math.max(max, byPhase[o].conteudo, byPhase[o].video); });
+    var rows = order.map(function(o){
+      var c = byPhase[o].conteudo, v = byPhase[o].video;
+      return '<div class="funnel-row"><div class="funnel-label">'+o+'</div>'+
+        '<div style="display:flex;flex-direction:column;gap:3px;">'+
+        '<div class="funnel-track"><div class="funnel-fill" style="width:'+(100*c/max)+'%;background:'+CAT.pipeline.conteudo+'"></div></div>'+
+        '<div class="funnel-track"><div class="funnel-fill" style="width:'+(100*v/max)+'%;background:'+CAT.pipeline.video+'"></div></div>'+
+        '</div>'+
+        '<div class="funnel-num"><b>'+n(c)+'</b> conteúdo<br>'+n(v)+' vídeo</div></div>';
+    }).join('');
+    document.getElementById('wip-macro').innerHTML =
+      '<div class="funnel">'+rows+'</div>'+
+      '<div class="legend"><span class="legend-item"><span class="swatch" style="background:'+CAT.pipeline.conteudo+'"></span>Conteúdo</span>'+
+      '<span class="legend-item"><span class="swatch" style="background:'+CAT.pipeline.video+'"></span>Vídeo</span></div>';
+
+    var discRows = currentDiscipline
+      ? DATA.disciplinas.filter(function(d){ return d.codigo===currentDiscipline; })
+      : DATA.disciplinas.filter(function(d){ return d.pendentes_conteudo>0; }).slice(0,8);
+    var discHtml = discRows.length ? discRows.map(function(d){
+      return '<tr><td><span class="card-name" title="'+esc(d.nome)+'">'+esc(d.nome)+'</span><div class="foot-note" style="margin:0">'+esc(d.codigo)+'</div></td>'+
+        '<td class="num">'+d.unidades_concluidas+'/'+d.unidades_tema+'</td></tr>';
+    }).join('') : '<tr><td colspan="2" class="foot-note">Nenhuma pendência de conteúdo nesta seleção.</td></tr>';
+    document.getElementById('disc-pendentes').innerHTML =
+      '<div class="table-wrap"><table><thead><tr><th>Disciplina</th><th class="num">Unidades concluídas</th></tr></thead><tbody>'+discHtml+'</tbody></table></div>'+
+      '<div class="foot-note">Unidades de Tema com Tester de Conteúdo concluído, de 4 possíveis.</div>';
+
+    var topMini = topParados(cards, 8);
+    var topHtml = topMini.length ? topMini.map(function(c){
+      var sev = agingSeverity(c.dias_parado);
+      return '<tr><td><a class="row-link" target="_blank" rel="noopener" href="'+esc(c.url)+'"><span class="card-name" style="max-width:220px" title="'+esc(c.nome)+'">'+esc(c.nome)+'</span></a></td>'+
+        '<td><span class="pill '+sev.c+'"><span class="dot" style="background:currentColor"></span>'+d1(c.dias_parado)+'d</span></td></tr>';
+    }).join('') : '<tr><td colspan="2" class="foot-note">Nenhum card ativo nesta seleção.</td></tr>';
+    document.getElementById('top-parados-mini').innerHTML =
+      '<div class="table-wrap"><table><thead><tr><th>Card</th><th>Parado há</th></tr></thead><tbody>'+topHtml+'</tbody></table></div>';
+  }
+
+  // ================= funil helper =================
+  function renderFunnel(container, etapas, color, opts){
+    opts = opts || {};
+    var max = etapas.length ? etapas[0].n || 1 : 1;
+    var cls = opts.mini ? ' mini-funnel' : '';
+    var html = '<div class="funnel'+cls+'">' + etapas.map(function(e){
+      return '<div class="funnel-row"><div class="funnel-label">'+esc(e.etapa)+'</div>'+
+        '<div class="funnel-track"><div class="funnel-fill" style="width:'+(100*e.n/max)+'%;background:'+color+'"></div></div>'+
+        '<div class="funnel-num"><b>'+n(e.n)+'</b> · '+pct(e.pct)+'</div></div>';
+    }).join('') + '</div>';
+    container.innerHTML = html;
+  }
+  // funil com cada etapa dividida em segmentos por unidade (1-4), coloridos.
+  function renderFunnelByUnit(container, etapas, opts){
+    opts = opts || {};
+    var max = etapas.length ? etapas[0].n || 1 : 1;
+    var cls = opts.mini ? ' mini-funnel' : '';
+    var html = '<div class="funnel'+cls+'">' + etapas.map(function(e){
+      var segsHtml = e.segs.map(function(s){
+        var w = 100*s.n/max;
+        return w>0 ? '<div style="width:'+w+'%;background:'+UNIT_COLOR[s.unidade]+'" title="Unidade '+s.unidade+': '+s.n+'"></div>' : '';
+      }).join('');
+      return '<div class="funnel-row"><div class="funnel-label">'+esc(e.etapa)+'</div>'+
+        '<div class="funnel-track" style="display:flex">'+segsHtml+'</div>'+
+        '<div class="funnel-num"><b>'+n(e.n)+'</b> · '+pct(e.pct)+'</div></div>';
+    }).join('') + '</div>';
+    container.innerHTML = html;
+  }
+
+  // ================= Esteira de Conteúdo =================
+  function renderQueue(container, filas){
+    if(!filas.length){ container.innerHTML = '<div class="foot-note">Sem transições suficientes nesta seleção para medir fila.</div>'; return; }
+    var max = Math.max.apply(null, filas.map(function(f){return f.p90;})) || 1;
+    var rows = filas.slice().sort(function(a,b){return b.mediana-a.mediana;}).map(function(f){
+      var wMed = 100*f.mediana/max, wP90 = 100*f.p90/max;
+      return '<div class="hbar-row"><div class="hbar-label">'+esc(f.de)+'<span class="arrow">→</span>'+esc(f.para)+'</div>'+
+        '<div class="hbar-track"><div class="hbar-fill" style="width:'+wMed+'%"></div><div class="hbar-p90tick" style="left:'+wP90+'%"></div></div>'+
+        '<div class="hbar-nums"><b>'+d1(f.mediana)+'d</b> mediana · p90 '+d1(f.p90)+'d</div></div>';
+    }).join('');
+    container.innerHTML = rows + '<div class="foot-note">Barra = mediana do tempo de fila. Traço = p90 (10% dos cards esperam mais que isso). n = '+filas.reduce(function(a,f){return a+f.n;},0)+' transições observadas.</div>';
+  }
+
+  function renderConteudo(cards){
+    var content = cards.filter(function(c){ return c.pipeline==='conteudo' && !c.template_teste; });
+    var temaCards = content.filter(function(c){ return c.tipo==='TEMA'; });
+    renderFunnelByUnit(document.getElementById('funil-tema'), buildFunnelByUnit(temaCards, STAGE_DEFS.TEMA).etapas);
+    document.getElementById('funil-tema-legend').innerHTML = UNIT_LEGEND;
+
+    // Plano de Ensino é um card único por disciplina (unidade "PE", não U1-U4) — não tem o que
+    // colorir por unidade, então mantém funil de cor única; INF/QUIZ/POD são por unidade 1-4.
+    var codesPorUnidade = ['INF','QUIZ','POD'];
+    var objLabel = {INF:'Infográfico', QUIZ:'Quiz', POD:'Podcast', PE:'Plano de Ensino'};
+    var htmlPorUnidade = codesPorUnidade.map(function(code){
+      var sub = content.filter(function(c){ return c.tipo===code; });
+      var f = buildFunnelByUnit(sub, STAGE_DEFS.OBJ);
+      if(!f.total) return '<div class="card pad mini-funnel"><h3>'+objLabel[code]+' <span class="foot-note" style="display:inline">(0)</span></h3><div class="foot-note" style="margin-top:8px">Nenhum card nesta seleção.</div></div>';
+      var max = f.etapas[0].n || 1;
+      var rows = f.etapas.map(function(e){
+        var segsHtml = e.segs.map(function(s){
+          var w = 100*s.n/max;
+          return w>0 ? '<div style="width:'+w+'%;background:'+UNIT_COLOR[s.unidade]+'" title="Unidade '+s.unidade+': '+s.n+'"></div>' : '';
+        }).join('');
+        return '<div class="funnel-row"><div class="funnel-label">'+esc(e.etapa)+'</div>'+
+          '<div class="funnel-track" style="display:flex">'+segsHtml+'</div>'+
+          '<div class="funnel-num"><b>'+n(e.n)+'</b> · '+pct(e.pct)+'</div></div>';
+      }).join('');
+      return '<div class="card pad mini-funnel"><h3>'+objLabel[code]+' <span class="foot-note" style="display:inline">('+n(f.total)+')</span></h3><div class="funnel" style="margin-top:8px">'+rows+'</div></div>';
+    }).join('');
+    var peCards = content.filter(function(c){ return c.tipo==='PE'; });
+    var fPe = buildFunnel(peCards, STAGE_DEFS.OBJ);
+    var htmlPe;
+    if(!fPe.total){
+      htmlPe = '<div class="card pad mini-funnel"><h3>Plano de Ensino <span class="foot-note" style="display:inline">(0)</span></h3><div class="foot-note" style="margin-top:8px">Nenhum card nesta seleção.</div></div>';
+    } else {
+      var maxPe = fPe.etapas[0].n || 1;
+      var rowsPe = fPe.etapas.map(function(e){
+        return '<div class="funnel-row"><div class="funnel-label">'+esc(e.etapa)+'</div>'+
+          '<div class="funnel-track"><div class="funnel-fill" style="width:'+(100*e.n/maxPe)+'%;background:'+CAT.tipo.PE+'"></div></div>'+
+          '<div class="funnel-num"><b>'+n(e.n)+'</b> · '+pct(e.pct)+'</div></div>';
+      }).join('');
+      htmlPe = '<div class="card pad mini-funnel"><h3>Plano de Ensino <span class="foot-note" style="display:inline">('+n(fPe.total)+')</span> <span class="foot-note" style="display:inline">— um card por disciplina, sem unidade</span></h3><div class="funnel" style="margin-top:8px">'+rowsPe+'</div></div>';
+    }
+    document.getElementById('funil-objetos').innerHTML = htmlPorUnidade + htmlPe;
+    document.getElementById('funil-objetos-legend').innerHTML = UNIT_LEGEND;
+
+    renderQueue(document.getElementById('filas-conteudo'), buildQueueChain(temaCards, STAGE_DEFS.TEMA));
+
+    var rows = unitBreakdown(temaCards, STAGE_DEFS.TEMA).map(function(u){
+      var last = u.etapas[u.etapas.length-1];
+      return '<div class="hbar-row"><div class="hbar-label">'+u.unidade+'</div>'+
+        '<div class="hbar-track"><div class="hbar-fill" style="background:'+UNIT_COLOR[u.unidade_num]+';width:'+last.pct+'%"></div></div>'+
+        '<div class="hbar-nums"><b>'+n(last.n)+'</b>/'+n(u.total)+' · '+pct(last.pct)+'</div></div>';
+    }).join('');
+    document.getElementById('tema-unidade').innerHTML = rows + '<div class="foot-note">% de Temas com Tester de Conteúdo concluído, por unidade.</div>';
+  }
+
+  // ================= Banco de Questões =================
+  var currentBdqPend = [];
+  function renderBdq(cards){
+    var bdqCards = cards.filter(function(c){ return c.pipeline==='bdq' && !c.template_teste; });
+    var f = buildFunnel(bdqCards, STAGE_DEFS.BDQ);
+    var lastEtapa = f.etapas.length ? f.etapas[f.etapas.length-1] : {n:0,pct:0};
+    var pendentes = f.total - lastEtapa.n;
+    var tiles = [
+      {label:'Total BDQ', value:n(f.total), sub:'cards de banco de questões'},
+      {label:'Publicados (Web)', value:n(lastEtapa.n), sub:pct(lastEtapa.pct)+' do total'},
+      {label:'Pendentes de publicação', value:n(pendentes), sub:'ainda não chegaram à Web', accent:true},
+    ];
+    document.getElementById('kpi-bdq').innerHTML = tiles.map(function(t){
+      return '<div class="kpi'+(t.accent?' accent':'')+'"><div class="label">'+esc(t.label)+'</div><div class="value">'+t.value+'</div><div class="sub">'+esc(t.sub)+'</div></div>';
+    }).join('');
+
+    var rows = unitBreakdown(bdqCards, STAGE_DEFS.BDQ).map(function(u){
+      var last = u.etapas[u.etapas.length-1];
+      return '<div class="hbar-row"><div class="hbar-label">'+u.unidade+'</div>'+
+        '<div class="hbar-track"><div class="hbar-fill" style="background:'+CAT.pipeline.bdq+';width:'+last.pct+'%"></div></div>'+
+        '<div class="hbar-nums"><b>'+n(last.n)+'</b>/'+n(u.total)+' · '+pct(last.pct)+'</div></div>';
+    }).join('');
+    document.getElementById('bdq-unidade').innerHTML = rows + '<div class="foot-note">% de BDQ publicado na Web, por unidade.</div>';
+
+    var wip = bdqWip(cards);
+    if(!wip.length){
+      document.getElementById('bdq-wip').innerHTML = '<div class="foot-note">Nenhum card de BDQ ativo nesta seleção.</div>';
+    } else {
+      var maxWip = Math.max.apply(null, wip.map(function(w){return w.n;})) || 1;
+      var wipRows = wip.map(function(w){
+        return '<div class="funnel-row"><div class="funnel-label">'+esc(w.etapa_atual)+'</div>'+
+          '<div class="funnel-track"><div class="funnel-fill" style="width:'+(100*w.n/maxWip)+'%;background:'+CAT.pipeline.bdq+'"></div></div>'+
+          '<div class="funnel-num"><b>'+n(w.n)+'</b></div></div>';
+      }).join('');
+      document.getElementById('bdq-wip').innerHTML = '<div class="funnel">'+wipRows+'</div>';
+    }
+
+    currentBdqPend = bdqCards.filter(function(c){ return !c.arquivado && c.etapa_atual!=='WEB' && c.etapa_atual!=='FINALIZADOS'; })
+      .sort(function(a,b){ return (b.dias_parado||0)-(a.dias_parado||0); });
+    document.querySelector('#tbl-bdq tbody').innerHTML = currentBdqPend.length ? currentBdqPend.map(function(c){
+      var sev = agingSeverity(c.dias_parado);
+      return '<tr><td><a class="row-link" target="_blank" rel="noopener" href="'+esc(c.url)+'"><span class="card-name" title="'+esc(c.nome)+'">'+esc(c.nome)+'</span></a></td>'+
+        '<td>'+esc(c.disciplina||'—')+'</td><td>'+esc(c.unidade_label||'—')+'</td><td>'+esc(c.etapa_atual)+'</td>'+
+        '<td class="num"><span class="pill '+sev.c+'">'+d1(c.dias_parado)+'d</span></td>'+
+        '<td><a class="row-link" target="_blank" rel="noopener" href="'+esc(c.url)+'">Trello ↗</a></td></tr>';
+    }).join('') : '<tr><td colspan="6" class="foot-note">Nenhum BDQ pendente nesta seleção.</td></tr>';
+  }
+  document.getElementById('export-bdq').addEventListener('click', function(){
+    exportCSV('bdq-pendentes.csv', currentBdqPend, [
+      {key:'nome',label:'Card'},{key:'disciplina',label:'Disciplina'},{key:'unidade_label',label:'Unidade'},
+      {key:'etapa_atual',label:'Etapa atual'},{key:'dias_parado',label:'Dias parado'},{key:'url',label:'URL'}
+    ]);
+  });
+
+  // ================= Esteira de Vídeo =================
+  function renderVideo(cards){
+    var video = cards.filter(function(c){ return c.pipeline==='video' && !c.template_teste; });
+    var codes = ['CONC','PEV','EDUV'];
+    var vidLabel = {CONC:'Conceituando', PEV:'Prática em Evidência', EDUV:'EADúvida'};
+    var html = codes.map(function(code){
+      var sub = video.filter(function(c){ return c.tipo===code; });
+      var f = buildFunnelByUnit(sub, STAGE_DEFS.VIDEO, true);
+      if(!f.total) return '<div class="card pad mini-funnel"><h3>'+vidLabel[code]+' <span class="foot-note" style="display:inline">(0)</span></h3><div class="foot-note" style="margin-top:8px">Nenhum card nesta seleção.</div></div>';
+      var max = f.etapas[0].n || 1;
+      var rows = f.etapas.map(function(e){
+        var segsHtml = e.segs.map(function(s){
+          var w = 100*s.n/max;
+          return w>0 ? '<div style="width:'+w+'%;background:'+UNIT_COLOR[s.unidade]+'" title="Unidade '+s.unidade+': '+s.n+'"></div>' : '';
+        }).join('');
+        return '<div class="funnel-row"><div class="funnel-label">'+esc(e.etapa)+'</div>'+
+          '<div class="funnel-track" style="display:flex">'+segsHtml+'</div>'+
+          '<div class="funnel-num"><b>'+n(e.n)+'</b> · '+pct(e.pct)+'</div></div>';
+      }).join('');
+      return '<div class="card pad mini-funnel"><h3>'+vidLabel[code]+' <span class="foot-note" style="display:inline">('+n(f.total)+')</span></h3><div class="funnel" style="margin-top:8px">'+rows+'</div></div>';
+    }).join('');
+    document.getElementById('funil-video').innerHTML = html;
+    document.getElementById('funil-video-legend').innerHTML = UNIT_LEGEND;
+    document.getElementById('funil-video-note').innerHTML = 'Se um card já alcançou uma etapa posterior, as etapas anteriores contam como concluídas mesmo sem data registrada (ex.: Web já finalizada com Liberação Conteudista em aberto).';
+
+    var queue = buildQueueChain(video, STAGE_DEFS.VIDEO);
+    renderQueue(document.getElementById('filas-video'), queue);
+
+    var rows = unitBreakdown(video, STAGE_DEFS.VIDEO, buildFunnelFlow).map(function(u){
+      var last = u.etapas[u.etapas.length-1];
+      return '<div class="hbar-row"><div class="hbar-label">'+u.unidade+'</div>'+
+        '<div class="hbar-track"><div class="hbar-fill" style="background:'+UNIT_COLOR[u.unidade_num]+';width:'+last.pct+'%"></div></div>'+
+        '<div class="hbar-nums"><b>'+n(last.n)+'</b>/'+n(u.total)+' · '+pct(last.pct)+'</div></div>';
+    }).join('');
+    document.getElementById('video-unidade').innerHTML = rows + '<div class="foot-note">% de vídeos com Tester de Conteúdo concluído, por unidade.</div>';
+
+    var dep = dependenciaExterna(cards);
+    var totalClassificado = dep.INTERNO+dep.EXTERNO;
+    var lib = queue.filter(function(f){return f.de==='Liberação Conteudista' && f.para==='Gravação';})[0];
+    var extPct = totalClassificado ? 100*dep.EXTERNO/totalClassificado : 0;
+    var notaPartes = [n(dep.totalDisciplinas)+' disciplinas com cards de vídeo nesta seleção'];
+    if(dep.conflitos) notaPartes.push(dep.conflitos+' com registro conflitante entre cards (resolvido pela classificação mais frequente)');
+    if(dep.semClassificacao) notaPartes.push(dep.semClassificacao+' sem classificação registrada');
+    document.getElementById('dependencia-externa').innerHTML =
+      '<div class="grid-3">'+
+      '<div class="kpi"><div class="label">Disciplinas — conteudista interno</div><div class="value">'+n(dep.INTERNO)+'</div></div>'+
+      '<div class="kpi accent"><div class="label">Disciplinas — conteudista externo</div><div class="value">'+n(dep.EXTERNO)+'</div><div class="sub">'+d1(extPct)+'% das disciplinas classificadas</div></div>'+
+      '<div class="kpi"><div class="label">Fila após liberação (aguardando gravação)</div><div class="value">'+(lib?d1(lib.mediana)+'d':'—')+'</div><div class="sub">mediana · p90 '+(lib?d1(lib.p90)+'d':'—')+'</div></div>'+
+      '</div>'+
+      '<div class="foot-note" style="margin-top:8px">Contagem por disciplina, não por card — cada disciplina tem um único conteudista. '+notaPartes.join(' · ')+'.</div>'+
+      '<div class="callout" style="margin-top:14px"><b>Ponto de atenção:</b> a etapa Liberação Conteudista → Gravação concentra a maior fila de todo o painel (ver aba "Ritmo &amp; Backlog" / funil de vídeo). Como depende de aprovação do conteudista, é o gargalo mais estrutural da esteira de vídeo.</div>';
+  }
+
+  // ================= Ritmo & Backlog =================
+  var currentTopParados = [];
+  function renderRitmo(cards){
+    var valid = cards.filter(function(c){ return !c.template_teste; });
+
+    var tput = throughputSemanal(valid).filter(function(r){return r.pipeline==='conteudo'||r.pipeline==='video';});
+    var weeks = {};
+    tput.forEach(function(r){ if(!weeks[r.semana]) weeks[r.semana]={conteudo:0,video:0}; weeks[r.semana][r.pipeline]=r.n; });
+    var keys = Object.keys(weeks).sort().slice(-16);
+    if(!keys.length){
+      document.getElementById('throughput-chart').innerHTML = '<div class="foot-note">Nenhuma conclusão registrada nesta seleção.</div>';
+    } else {
+      var max = 1;
+      keys.forEach(function(k){ max = Math.max(max, weeks[k].conteudo+weeks[k].video); });
+      var w = 46, gap = 8, chartW = keys.length*(w+gap), chartH = 200, base = chartH-24;
+      var bars = keys.map(function(k, i){
+        var x = i*(w+gap);
+        var hc = base * (weeks[k].conteudo/max), hv = base * (weeks[k].video/max);
+        var dt = new Date(k+'T00:00:00');
+        var label = dt.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'});
+        return '<g transform="translate('+x+',0)">'+
+          '<rect x="0" y="'+(base-hv-hc)+'" width="'+w+'" height="'+hc+'" fill="'+CAT.pipeline.conteudo+'" rx="2"></rect>'+
+          '<rect x="0" y="'+(base-hv)+'" width="'+w+'" height="'+hv+'" fill="'+CAT.pipeline.video+'" rx="2"></rect>'+
+          '<text x="'+(w/2)+'" y="'+(base+16)+'" text-anchor="middle" font-size="10" fill="var(--ink-3)" font-family="var(--font-mono)">'+label+'</text>'+
+          '</g>';
+      }).join('');
+      var svg = '<svg viewBox="0 0 '+chartW+' '+chartH+'" width="100%" style="max-width:'+(chartW+40)+'px;overflow:visible" role="img" aria-label="Cards finalizados por semana">'+
+        '<line x1="0" y1="'+base+'" x2="'+chartW+'" y2="'+base+'" stroke="var(--grid-strong)"></line>'+ bars + '</svg>';
+      document.getElementById('throughput-chart').innerHTML =
+        '<div style="overflow-x:auto">'+svg+'</div>'+
+        '<div class="legend"><span class="legend-item"><span class="swatch" style="background:'+CAT.pipeline.conteudo+'"></span>Conteúdo</span>'+
+        '<span class="legend-item"><span class="swatch" style="background:'+CAT.pipeline.video+'"></span>Vídeo</span></div>';
+    }
+
+    var agingData = buildAgingByPhase(valid);
+    var bucketColor = {'0-2 dias':'var(--good)','3-7 dias':'var(--ink-3)','8-15 dias':'var(--warning)','16-30 dias':'var(--serious)','30+ dias':'var(--critical)'};
+    var rows = agingData.order.map(function(o){
+      var total = agingData.buckets.reduce(function(a,b){return a+agingData.by[o][b];},0) || 1;
+      var segs = agingData.buckets.map(function(b){
+        var w = 100*agingData.by[o][b]/total;
+        return w>0 ? '<div style="width:'+w+'%;background:'+bucketColor[b]+'" title="'+b+': '+agingData.by[o][b]+'"></div>' : '';
+      }).join('');
+      return '<div class="funnel-row"><div class="funnel-label">'+o+'</div>'+
+        '<div class="funnel-track" style="display:flex">'+segs+'</div>'+
+        '<div class="funnel-num"><b>'+n(total)+'</b> cards</div></div>';
+    }).join('');
+    var legend = agingData.buckets.map(function(b){ return '<span class="legend-item"><span class="swatch" style="background:'+bucketColor[b]+'"></span>'+b+'</span>'; }).join('');
+    document.getElementById('aging-chart').innerHTML = '<div class="funnel">'+rows+'</div><div class="legend">'+legend+'</div>';
+
+    currentTopParados = topParados(valid, 25);
+    document.querySelector('#tbl-parados tbody').innerHTML = currentTopParados.length ? currentTopParados.map(function(c){
+      var sev = agingSeverity(c.dias_parado);
+      return '<tr><td><span class="card-name" title="'+esc(c.nome)+'">'+esc(c.nome)+'</span></td>'+
+        '<td>'+(PIPE_LABEL[c.pipeline]||c.pipeline)+'</td><td>'+esc(c.etapa_atual)+'</td>'+
+        '<td class="num"><span class="pill '+sev.c+'">'+d1(c.dias_parado)+'d</span></td>'+
+        '<td><a class="row-link" target="_blank" rel="noopener" href="'+esc(c.url)+'">Trello ↗</a></td></tr>';
+    }).join('') : '<tr><td colspan="5" class="foot-note">Nenhum card ativo nesta seleção.</td></tr>';
+  }
+  document.getElementById('export-parados').addEventListener('click', function(){
+    exportCSV('cards-mais-parados.csv', currentTopParados, [
+      {key:'nome',label:'Card'},{key:'pipeline',label:'Pipeline'},{key:'etapa_atual',label:'Etapa atual'},{key:'dias_parado',label:'Dias parado'},{key:'url',label:'URL'}
+    ]);
+  });
+
+  // ================= Produtividade (por pessoa e por equipe organizacional) =================
+  function renderProdutividade(cards){
+    var valid = cards.filter(function(c){ return !c.template_teste; });
+    var prod = buildProdutividade(valid);
+    var pessoas = prod.pessoas, equipes = prod.equipes;
+    var totalConcluidas = prod.totalEventos;
+    var maiorEquipe = equipes.slice().sort(function(a,b){return b.total_concluidas-a.total_concluidas;})[0];
+    var maisAtivos28d = pessoas.slice().sort(function(a,b){return b.ultimos_28d-a.ultimos_28d;})[0];
+    var tiles = [
+      {label:'Etapas concluídas (total)', value:n(totalConcluidas), sub:'com responsável identificado'},
+      {label:'Pessoas com registro', value:n(pessoas.length), sub:equipes.length+' grupos (equipes + externos)'},
+      {label:'Equipe com mais entregas', value:maiorEquipe?maiorEquipe.equipe:'—', sub:maiorEquipe?n(maiorEquipe.total_concluidas)+' etapas':''},
+      {label:'Mais ativo(a) nos últimos 28d', value:maisAtivos28d?maisAtivos28d.pessoa:'—', sub:maisAtivos28d?n(maisAtivos28d.ultimos_28d)+' etapas':'', accent:true},
+    ];
+    document.getElementById('kpi-produtividade').innerHTML = tiles.map(function(t){
+      return '<div class="kpi'+(t.accent?' accent':'')+'"><div class="label">'+esc(t.label)+'</div><div class="value">'+esc(t.value)+'</div><div class="sub">'+esc(t.sub)+'</div></div>';
+    }).join('');
+
+    document.querySelector('#tbl-equipes tbody').innerHTML = equipes.length ? equipes.map(function(e){
+      return '<tr><td><span class="pill p-neutral" style="background:none"><span class="dot" style="background:'+(CAT.equipe[e.equipe]||'var(--ink-3)')+'"></span>'+esc(e.equipe)+'</span></td>'+
+        '<td class="num">'+n(e.pessoas)+'</td><td class="num">'+n(e.total_concluidas)+'</td><td class="num">'+n(e.ultimos_28d)+'</td></tr>';
+    }).join('') : '<tr><td colspan="4" class="foot-note">Sem registros nesta seleção.</td></tr>';
+
+    document.querySelector('#tbl-pessoas tbody').innerHTML = pessoas.length ? pessoas.map(function(p){
+      return '<tr><td>'+esc(p.pessoa)+'</td><td>'+esc(p.equipe)+'</td><td>'+esc(p.etapa_principal)+'</td>'+
+        '<td class="num"><b>'+n(p.total_concluidas)+'</b></td><td class="num">'+n(p.ultimos_28d)+'</td></tr>';
+    }).join('') : '<tr><td colspan="5" class="foot-note">Sem registros nesta seleção.</td></tr>';
+
+    var weeks = {};
+    var teams = ['Desenho Educacional','Soluções Educacionais','Design e Mídia Digital','Externo','Não mapeado'];
+    prod.produtividade_semanal.forEach(function(r){ if(!weeks[r.semana]) weeks[r.semana]={}; weeks[r.semana][r.equipe]=r.n; });
+    var keys = Object.keys(weeks).sort().slice(-16);
+    if(!keys.length){
+      document.getElementById('produtividade-chart').innerHTML = '<div class="foot-note">Sem dados nesta seleção.</div>';
+      return;
+    }
+    var max = 1;
+    keys.forEach(function(k){ var t=0; teams.forEach(function(tm){t+=weeks[k][tm]||0;}); max=Math.max(max,t); });
+    var w = 46, gap = 8, chartW = keys.length*(w+gap), chartH = 210, base = chartH-24;
+    var bars = keys.map(function(k, i){
+      var x = i*(w+gap), yCursor = base;
+      var segs = teams.map(function(tm){
+        var v = weeks[k][tm]||0, h = base*(v/max);
+        yCursor -= h;
+        return v>0 ? '<rect x="0" y="'+yCursor+'" width="'+w+'" height="'+h+'" fill="'+CAT.equipe[tm]+'" rx="2"></rect>' : '';
+      }).join('');
+      var dt = new Date(k+'T00:00:00');
+      var label = dt.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'});
+      return '<g transform="translate('+x+',0)">'+segs+'<text x="'+(w/2)+'" y="'+(base+16)+'" text-anchor="middle" font-size="10" fill="var(--ink-3)" font-family="var(--font-mono)">'+label+'</text></g>';
+    }).join('');
+    var svg = '<svg viewBox="0 0 '+chartW+' '+chartH+'" width="100%" style="max-width:'+(chartW+40)+'px;overflow:visible" role="img" aria-label="Etapas concluídas por semana e equipe"><line x1="0" y1="'+base+'" x2="'+chartW+'" y2="'+base+'" stroke="var(--grid-strong)"></line>'+bars+'</svg>';
+    var legend = teams.map(function(tm){ return '<span class="legend-item"><span class="swatch" style="background:'+CAT.equipe[tm]+'"></span>'+tm+'</span>'; }).join('');
+    document.getElementById('produtividade-chart').innerHTML = '<div style="overflow-x:auto">'+svg+'</div><div class="legend">'+legend+'</div>';
+  }
+
+  // ================= Funções (Design Gráfico, DI, Qualidade, Vídeo, Revisão, Webdesign) =================
+  var FUNCAO_MAP = {
+    'Qualidade 01':'Qualidade', 'Qualidade 02':'Qualidade', 'Tester DI':'Qualidade', 'Tester Conteúdo':'Qualidade',
+    'DI':'DI',
+    'DG':'Design Gráfico',
+    'Revisão':'Revisão', 'Roteiro Revisão':'Revisão',
+    'Liberação Conteudista':'Vídeo', 'Gravação':'Vídeo', 'Edição':'Vídeo',
+    'Web':'Webdesign'
+  };
+  var FUNCAO_ORDER = ['Design Gráfico','DI','Qualidade','Vídeo','Revisão','Webdesign'];
+  var FUNCAO_COLOR = {'Design Gráfico':'var(--cat-1)','DI':'var(--cat-2)','Qualidade':'var(--cat-3)','Vídeo':'var(--cat-4)','Revisão':'var(--cat-5)','Webdesign':'var(--cat-6)'};
+  var funcaoGranularity = 'dia';
+
+  function buildFuncaoEvents(cards){
+    var events = [];
+    cards.forEach(function(c){
+      if(c.template_teste) return;
+      (c.resp_stages||[]).forEach(function(ev){
+        var funcao = FUNCAO_MAP[ev.etapa];
+        if(!funcao) return;
+        events.push({funcao:funcao, etapa:ev.etapa, pessoa:ev.pessoa, data:ev.data});
+      });
+    });
+    return events;
+  }
+  function periodKey(dateStr, granularity){
+    var d = new Date(dateStr);
+    if(granularity==='dia') return d.toISOString().slice(0,10);
+    if(granularity==='semana') return weekStartMonday(d);
+    var mm = d.getUTCMonth()+1;
+    return d.getUTCFullYear()+'-'+(mm<10?'0':'')+mm;
+  }
+  function buildFuncaoSeries(events, granularity, limitPeriods){
+    var counts = {}, periodSet = {};
+    events.forEach(function(e){
+      var k = periodKey(e.data, granularity);
+      periodSet[k] = true;
+      var key = k+'|'+e.funcao;
+      counts[key] = (counts[key]||0)+1;
+    });
+    var periods = Object.keys(periodSet).sort().slice(-limitPeriods);
+    return {periods:periods, counts:counts};
+  }
+  function buildFuncaoSummary(events){
+    var cutoff7 = new Date(SNAPSHOT_DATE.getTime() - 7*86400000);
+    var cutoff14 = new Date(SNAPSHOT_DATE.getTime() - 14*86400000);
+    var cutoff28 = new Date(SNAPSHOT_DATE.getTime() - 28*86400000);
+    var by = {};
+    FUNCAO_ORDER.forEach(function(f){ by[f] = {total:0, ult7:0, prev7:0, ult28:0, etapas:{}, pessoas:{}}; });
+    events.forEach(function(e){
+      var b = by[e.funcao]; if(!b) return;
+      b.total++;
+      var dt = new Date(e.data);
+      if(dt>=cutoff7) b.ult7++;
+      else if(dt>=cutoff14) b.prev7++;
+      if(dt>=cutoff28) b.ult28++;
+      b.etapas[e.etapa] = (b.etapas[e.etapa]||0)+1;
+      b.pessoas[e.pessoa] = (b.pessoas[e.pessoa]||0)+1;
+    });
+    return FUNCAO_ORDER.map(function(f){
+      var b = by[f];
+      var principal=null, mx=-1;
+      Object.keys(b.etapas).forEach(function(k){ if(b.etapas[k]>mx){ mx=b.etapas[k]; principal=k; } });
+      var topPessoa=null, mx2=-1;
+      Object.keys(b.pessoas).forEach(function(k){ if(b.pessoas[k]>mx2){ mx2=b.pessoas[k]; topPessoa=k; } });
+      var trend = b.prev7>0 ? Math.round(100*(b.ult7-b.prev7)/b.prev7) : (b.ult7>0?100:0);
+      return {funcao:f, total:b.total, ult7:b.ult7, prev7:b.prev7, ult28:b.ult28, trend:trend, etapa_principal:principal, pessoa_top:topPessoa, etapas:b.etapas};
+    });
+  }
+  function renderFuncaoChart(container, seriesData, granularity){
+    var periods = seriesData.periods;
+    if(!periods.length){ container.innerHTML = '<div class="foot-note">Sem dados nesta seleção.</div>'; return; }
+    var max = 1;
+    FUNCAO_ORDER.forEach(function(f){ periods.forEach(function(p){ max = Math.max(max, seriesData.counts[p+'|'+f]||0); }); });
+    var padL=6, padR=60, padT=10, padB=26;
+    var chartW = Math.max(560, periods.length*(periods.length>20?26:40));
+    var stepX = periods.length>1 ? (chartW-padL-padR)/(periods.length-1) : 0;
+    var chartH = 220, plotH = chartH-padT-padB;
+    function yOf(v){ return padT + plotH - (plotH*v/max); }
+    function xOf(i){ return padL + i*stepX; }
+    var gridLines = '';
+    for(var i=0;i<=4;i++){
+      var v = Math.round(max*i/4), y = yOf(v);
+      gridLines += '<line x1="'+padL+'" y1="'+y+'" x2="'+(chartW-padR)+'" y2="'+y+'" stroke="var(--grid)"></line>';
+      gridLines += '<text x="'+(chartW-padR+6)+'" y="'+(y+3)+'" font-size="10" fill="var(--ink-3)" font-family="var(--font-mono)">'+v+'</text>';
+    }
+    var lines = FUNCAO_ORDER.map(function(f){
+      var pts = periods.map(function(p,i){ return xOf(i)+','+yOf(seriesData.counts[p+'|'+f]||0); }).join(' ');
+      var dots = periods.map(function(p,i){
+        var val = seriesData.counts[p+'|'+f]||0;
+        return '<circle cx="'+xOf(i)+'" cy="'+yOf(val)+'" r="2.6" fill="'+FUNCAO_COLOR[f]+'"><title>'+f+' · '+p+': '+val+'</title></circle>';
+      }).join('');
+      return '<polyline points="'+pts+'" fill="none" stroke="'+FUNCAO_COLOR[f]+'" stroke-width="2"></polyline>'+dots;
+    }).join('');
+    var everyN = Math.max(1, Math.ceil(periods.length/10));
+    var xLabels = periods.map(function(p,i){
+      if(i%everyN!==0 && i!==periods.length-1) return '';
+      var lbl = granularity==='mes' ? p : new Date(p+'T00:00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'});
+      return '<text x="'+xOf(i)+'" y="'+(chartH-8)+'" text-anchor="middle" font-size="9.5" fill="var(--ink-3)" font-family="var(--font-mono)">'+lbl+'</text>';
+    }).join('');
+    var svg = '<svg viewBox="0 0 '+chartW+' '+chartH+'" width="100%" style="max-width:'+(chartW+20)+'px;overflow:visible" role="img" aria-label="Etapas concluídas por função ao longo do tempo">'+gridLines+lines+xLabels+'</svg>';
+    var legend = FUNCAO_ORDER.map(function(f){ return '<span class="legend-item"><span class="swatch" style="background:'+FUNCAO_COLOR[f]+'"></span>'+f+'</span>'; }).join('');
+    container.innerHTML = '<div style="overflow-x:auto">'+svg+'</div><div class="legend">'+legend+'</div>';
+  }
+  function renderFuncoes(cards){
+    var valid = cards.filter(function(c){ return !c.template_teste; });
+    var events = buildFuncaoEvents(valid);
+    var summary = buildFuncaoSummary(events);
+
+    document.getElementById('kpi-funcoes').innerHTML = summary.map(function(s){
+      var trendTxt = (s.trend>0?'+':'')+s.trend+'%';
+      return '<div class="kpi"><div class="label">'+esc(s.funcao)+'</div><div class="value">'+n(s.total)+'</div>'+
+        '<div class="sub">'+n(s.ult7)+' últ. 7d ('+trendTxt+' vs 7d anteriores)</div></div>';
+    }).join('');
+
+    var limit = funcaoGranularity==='dia' ? 30 : (funcaoGranularity==='semana' ? 16 : 12);
+    var series = buildFuncaoSeries(events, funcaoGranularity, limit);
+    renderFuncaoChart(document.getElementById('funcoes-chart'), series, funcaoGranularity);
+
+    document.querySelector('#tbl-funcoes tbody').innerHTML = summary.length ? summary.map(function(s){
+      var sev = s.trend>=0 ? 'p-good' : (s.trend>=-20 ? 'p-warning' : 'p-critical');
+      return '<tr><td><span class="dot" style="background:'+FUNCAO_COLOR[s.funcao]+';display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;"></span>'+esc(s.funcao)+'</td>'+
+        '<td class="num">'+n(s.total)+'</td><td class="num">'+n(s.ult7)+'</td><td class="num">'+n(s.ult28)+'</td>'+
+        '<td><span class="pill '+sev+'">'+(s.trend>0?'+':'')+s.trend+'%</span></td>'+
+        '<td>'+esc(s.etapa_principal||'—')+'</td><td>'+esc(s.pessoa_top||'—')+'</td></tr>';
+    }).join('') : '<tr><td colspan="7" class="foot-note">Sem registros nesta seleção.</td></tr>';
+
+    document.getElementById('funcoes-composicao').innerHTML = summary.map(function(s){
+      var etapas = Object.keys(s.etapas).map(function(k){ return {etapa:k, n:s.etapas[k]}; }).sort(function(a,b){ return b.n-a.n; });
+      var mx = etapas.length ? etapas[0].n : 1;
+      var rows = etapas.map(function(e){
+        return '<div class="funnel-row" style="grid-template-columns:118px 1fr 46px;padding:4px 0;"><div class="funnel-label" style="font-size:11px">'+esc(e.etapa)+'</div>'+
+          '<div class="funnel-track" style="height:14px"><div class="funnel-fill" style="width:'+(100*e.n/mx)+'%;background:'+FUNCAO_COLOR[s.funcao]+'"></div></div>'+
+          '<div class="funnel-num" style="font-size:11px">'+n(e.n)+'</div></div>';
+      }).join('');
+      return '<div class="card pad mini-funnel"><h3>'+esc(s.funcao)+' <span class="foot-note" style="display:inline">('+n(s.total)+')</span></h3><div class="funnel" style="margin-top:8px">'+(rows||'<div class="foot-note">Sem dados nesta seleção.</div>')+'</div></div>';
+    }).join('');
+  }
+  document.getElementById('funcao-granularidade').addEventListener('click', function(e){
+    var btn = e.target.closest('button'); if(!btn) return;
+    funcaoGranularity = btn.dataset.g;
+    document.querySelectorAll('#funcao-granularidade button').forEach(function(b){ b.classList.remove('active'); });
+    btn.classList.add('active');
+    renderFuncoes(scopedCards());
+  });
+
+  // ================= Cards Extras =================
+  var currentExtras = [];
+  function renderExtras(cards){
+    var groups = extrasByGroup(cards);
+    document.getElementById('kpi-extras').innerHTML = groups.length ? groups.map(function(g){
+      return '<div class="kpi"><div class="label">'+esc(g.grupo_extra)+'</div><div class="value">'+n(g.n)+'</div></div>';
+    }).join('') : '<div class="foot-note">Nenhum card extra nesta seleção.</div>';
+
+    var sel = document.getElementById('f-extra-grupo');
+    var prevVal = sel.value;
+    sel.innerHTML = '<option value="">Todos os grupos</option>';
+    groups.forEach(function(g){
+      var opt = document.createElement('option'); opt.value = g.grupo_extra; opt.textContent = g.grupo_extra+' ('+g.n+')';
+      sel.appendChild(opt);
+    });
+    sel.value = groups.some(function(g){ return g.grupo_extra===prevVal; }) ? prevVal : '';
+
+    var extraCards = cards.filter(function(c){ return c.pipeline==='extras'; });
+    function draw(){
+      var grupo = sel.value;
+      var rows = extraCards.filter(function(c){ return !grupo || c.grupo_extra===grupo; });
+      document.querySelector('#tbl-extras tbody').innerHTML = rows.length ? rows.map(function(c){
+        return '<tr><td><a class="row-link" target="_blank" rel="noopener" href="'+esc(c.url)+'"><span class="card-name" title="'+esc(c.nome)+'">'+esc(c.nome)+'</span></a></td>'+
+          '<td>'+esc(c.grupo_extra)+'</td><td>'+esc(c.etapa_atual)+'</td>'+
+          '<td>'+(c.arquivado?'<span class="pill p-neutral">Arquivado</span>':'<span class="pill p-good">Ativo</span>')+'</td>'+
+          '<td><a class="row-link" target="_blank" rel="noopener" href="'+esc(c.url)+'">Trello ↗</a></td></tr>';
+      }).join('') : '<tr><td colspan="5" class="foot-note">Nenhum card nesta seleção.</td></tr>';
+      currentExtras = rows;
+    }
+    draw();
+    sel.onchange = draw;
+  }
+  document.getElementById('export-extras').addEventListener('click', function(){
+    exportCSV('cards-extras.csv', currentExtras, [
+      {key:'nome',label:'Card'},{key:'grupo_extra',label:'Grupo'},{key:'etapa_atual',label:'Etapa atual'},
+      {key:'arquivado',label:'Arquivado'},{key:'url',label:'URL'}
+    ]);
+  });
+
+  // ================= Consultar Cards =================
+  var CARDS = ALL_CARDS.filter(function(c){ return !c.template_teste; });
+  (function(){
+    document.getElementById('consulta-count').textContent = n(CARDS.length) + ' cards no total (excluindo modelos/testes) · os filtros globais de código/disciplina e unidade também se aplicam aqui';
+    function fillSelect(id, values, labelMap){
+      var sel = document.getElementById(id);
+      values.forEach(function(v){
+        var opt = document.createElement('option');
+        opt.value = v; opt.textContent = (labelMap && labelMap[v]) || v;
+        sel.appendChild(opt);
+      });
+    }
+    fillSelect('f-pipeline', ['conteudo','video','bdq','extras'], PIPE_LABEL);
+    fillSelect('f-tipo', ['TEMA','INF','QUIZ','POD','PE','BDQ','CONC','PEV','EDUV'], TIPO_LABEL);
+    fillSelect('f-fase', ['Intake','Produção Conteúdo','Produção Vídeo','Publicação','Concluído','Outro']);
+  })();
+
+  var page = 0, pageSize = 40, filtered = CARDS;
+  function applyFilters(){
+    var texto = document.getElementById('f-texto').value.trim().toLowerCase();
+    var pipeline = document.getElementById('f-pipeline').value;
+    var tipo = document.getElementById('f-tipo').value;
+    var fase = document.getElementById('f-fase').value;
+    var status = document.getElementById('f-status').value;
+    filtered = CARDS.filter(function(c){
+      if(currentDiscipline && c.codigo!==currentDiscipline) return false;
+      if(currentUnidade && c.unidade_num!==currentUnidade) return false;
+      if(pipeline && c.pipeline!==pipeline) return false;
+      if(tipo && c.tipo!==tipo) return false;
+      if(fase && c.macro_fase!==fase) return false;
+      if(status==='ativo' && c.arquivado) return false;
+      if(status==='arquivado' && !c.arquivado) return false;
+      if(texto){
+        var hay = (c.nome+' '+(c.codigo||'')+' '+(c.disciplina||'')).toLowerCase();
+        if(hay.indexOf(texto)===-1) return false;
+      }
+      return true;
+    });
+    page = 0;
+    renderTable();
+  }
+  function renderTable(){
+    var start = page*pageSize, slice = filtered.slice(start, start+pageSize);
+    var tbody = document.querySelector('#tbl-consulta tbody');
+    tbody.innerHTML = slice.map(function(c){
+      var sev = agingSeverity(c.arquivado ? null : c.dias_parado);
+      return '<tr><td><a class="row-link" target="_blank" rel="noopener" href="'+esc(c.url)+'"><span class="card-name" title="'+esc(c.nome)+'">'+esc(c.nome)+'</span></a></td>'+
+        '<td>'+esc(c.disciplina||'—')+'</td><td>'+esc(c.unidade_label||'—')+'</td><td>'+esc(TIPO_LABEL[c.tipo]||c.tipo||'—')+'</td>'+
+        '<td>'+(PIPE_LABEL[c.pipeline]||c.pipeline)+'</td><td>'+esc(c.etapa_atual)+'</td>'+
+        '<td>'+(c.arquivado?'<span class="pill p-neutral">Arquivado</span>':'<span class="pill p-good">Ativo</span>')+'</td>'+
+        '<td class="num">'+(c.arquivado?'—':'<span class="pill '+sev.c+'">'+d1(c.dias_parado)+'d</span>')+'</td></tr>';
+    }).join('');
+    var totalPages = Math.max(1, Math.ceil(filtered.length/pageSize));
+    document.getElementById('pg-info').textContent = 'Página '+(page+1)+' de '+totalPages+' · '+n(filtered.length)+' resultados';
+    document.getElementById('pg-prev').disabled = page<=0;
+    document.getElementById('pg-next').disabled = page>=totalPages-1;
+  }
+  ['f-texto','f-pipeline','f-tipo','f-fase','f-status'].forEach(function(id){
+    document.getElementById(id).addEventListener('input', applyFilters);
+    document.getElementById(id).addEventListener('change', applyFilters);
+  });
+  document.getElementById('pg-prev').addEventListener('click', function(){ if(page>0){page--; renderTable();} });
+  document.getElementById('pg-next').addEventListener('click', function(){ page++; renderTable(); });
+  document.getElementById('export-consulta').addEventListener('click', function(){
+    exportCSV('cards-filtrados.csv', filtered, [
+      {key:'nome',label:'Card'},{key:'codigo',label:'Código'},{key:'disciplina',label:'Disciplina'},
+      {key:'unidade_label',label:'Unidade'},{key:'tipo',label:'Tipo'},{key:'pipeline',label:'Pipeline'},
+      {key:'etapa_atual',label:'Etapa atual'},{key:'arquivado',label:'Arquivado'},{key:'dias_parado',label:'Dias parado'},
+      {key:'tipo_conteudista',label:'Conteudista'},{key:'membros',label:'Membros'},{key:'url',label:'URL'}
+    ]);
+  });
+
+  // ================= orquestração global =================
+  function renderAll(){
+    var cards = scopedCards();
+    renderMeta();
+    renderVisaoGeral(cards);
+    renderConteudo(cards);
+    renderBdq(cards);
+    renderVideo(cards);
+    renderRitmo(cards);
+    renderProdutividade(cards);
+    renderFuncoes(cards);
+    renderExtras(cards);
+    applyFilters();
+  }
+  renderAll();
+
+  }
+
+  fetch('./data.json', {cache: 'no-store'})
+    .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status+' ao buscar data.json'); return r.json(); })
+    .then(init)
+    .catch(function(err){
+      console.error(err);
+      document.body.insertAdjacentHTML('afterbegin',
+        '<div style="padding:14px 20px;background:#f9dcdc;color:#8a1f1f;font:14px -apple-system,sans-serif;border-bottom:1px solid #d03b3b">'+
+        'Não foi possível carregar data.json: '+err.message+
+        ' — verifique se o arquivo existe na raiz do site e se o workflow de atualização já rodou pelo menos uma vez.</div>');
+    });
+})();
+</script>
+
