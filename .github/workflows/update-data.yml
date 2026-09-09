@@ -41,5 +41,6 @@ jobs:
             echo "Sem mudanças nos dados."
           else
             git commit -m "Atualiza dados do Trello ($(date -u +'%Y-%m-%d %H:%M UTC'))"
+            git pull --rebase origin main
             git push
           fi
