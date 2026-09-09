@@ -126,7 +126,27 @@ LIST_TO_MACRO = {
     "CAPACITADOS": "Concluído",
     "FINALIZADOS": "Concluído",
     "ARQUIVADOS": "Concluído",
+    "CARDS ESTÚDIO": "Produção Vídeo",
+    # >>> PONTO DE ATENÇÃO (favor validar) <<<
+    # Não sabemos ao certo o que essa lista representa no fluxo real; assumimos
+    # que é uma etapa de vídeo aguardando conteudista. Ajuste se necessário.
+    "SEM CONTEUDISTA": "Produção Vídeo",
 }
+
+# Algumas listas do board real têm sufixos como " | PRODUÇÃO" (provavelmente de
+# uma view/swimlane do Trello). Se o nome exato não bater, tenta de novo sem o sufixo.
+LIST_NAME_SUFFIXES_TO_STRIP = (" | PRODUÇÃO",)
+
+
+def resolve_macro_fase(etapa_upper):
+    if etapa_upper in LIST_TO_MACRO:
+        return LIST_TO_MACRO[etapa_upper]
+    for suf in LIST_NAME_SUFFIXES_TO_STRIP:
+        if etapa_upper.endswith(suf):
+            base = etapa_upper[: -len(suf)]
+            if base in LIST_TO_MACRO:
+                return LIST_TO_MACRO[base]
+    return "Outro"
 
 # Etapas com "responsável" — nomes exatamente como usados no front-end (STAGE_DEFS),
 # usados para popular resp_stages / a aba "Funções".
@@ -146,9 +166,15 @@ for equipe, pessoas in TEAM_ROSTER.items():
     for p in pessoas:
         PESSOA_TO_EQUIPE[p] = equipe
 
+# Unidade "U1".."U4" (conteúdo) ou "V1".."V4" (vídeo) ou "PE" isolado (plano de ensino).
+# "projeto" usa [^_]+ (em vez de [A-Z0-9.]+) porque projetos como "PÓS" têm acento.
 CARD_NAME_RE = re.compile(
-    r"^(?P<projeto>[A-Z0-9.]+)_U(?P<unidade>[1-4]|PE)_(?P<tipo>[A-Z]+)_(?P<codigo>[A-Z0-9]+)_(?P<disciplina>.+)$"
+    r"^(?P<projeto>[^_]+)_(?:[UV](?P<unidade>[1-4])|(?P<unidade_pe>PE))_"
+    r"(?P<tipo>[A-Z0-9]+)_(?P<codigo>[A-Z0-9]+)_(?P<disciplina>.+)$"
 )
+
+# Card "Tema" tem um tipo por unidade (T1..T4) em vez do literal "TEMA".
+TEMA_TIPO_RE = re.compile(r"^T[1-4]$")
 
 
 def strip_accents(s):
@@ -157,18 +183,29 @@ def strip_accents(s):
 
 def classify_card_name(nome):
     """Extrai unidade/tipo/codigo/disciplina do nome do card, ou None se fora do padrão."""
-    m = CARD_NAME_RE.match(nome.strip())
+    # Alguns cards têm tabs em vez de "_" entre os segmentos (erro de digitação no Trello);
+    # normaliza para não perder a classificação por causa disso.
+    nome_norm = re.sub(r"[_\t]+", "_", nome.strip())
+    m = CARD_NAME_RE.match(nome_norm)
     if not m:
         return None
-    return m.groupdict()
+    groups = m.groupdict()
+    if groups.get("unidade_pe"):
+        groups["unidade"] = "PE"
+    del groups["unidade_pe"]
+    return groups
+
+
+def is_tema_tipo(tipo):
+    return tipo == "TEMA" or bool(TEMA_TIPO_RE.match(tipo or ""))
 
 
 def pipeline_and_stage_def(tipo):
-    if tipo == "TEMA":
+    if is_tema_tipo(tipo):
         return "conteudo", "TEMA"
-    if tipo in ("INF", "QUIZ", "POD", "PE"):
+    if tipo in ("INF", "QUIZ", "POD", "PE", "INT"):
         return "conteudo", "OBJ"
-    if tipo in ("CONC", "PEV", "EDUV"):
+    if tipo in ("CONC", "PEV", "EDUV", "EADUV"):
         return "video", "VIDEO"
     if tipo == "BDQ":
         return "bdq", "BDQ"
@@ -200,7 +237,7 @@ def main():
     now = datetime.now(timezone.utc)
 
     print("Buscando listas do board...", file=sys.stderr)
-    lists = trello_get(f"/boards/{BOARD_ID}/lists", fields="name,closed")
+    lists = trello_get(f"/boards/{BOARD_ID}/lists", fields="name,closed", filter="all")
     list_name_by_id = {l["id"]: l["name"] for l in lists}
 
     print("Buscando membros do board...", file=sys.stderr)
@@ -260,14 +297,26 @@ def main():
         resp_stages = []
         if stage_key:
             labels = STAGE_DEFS[stage_key]
-            label_set = set(labels)
+            # Listas do Trello vêm em CAIXA ALTA; STAGE_DEFS usa Title Case para exibição.
+            # Casa por nome normalizado (maiúsculo) e devolve o rótulo "bonito" canônico.
+            label_by_upper = {lbl.upper(): lbl for lbl in labels}
+
+            def canon_label(lista_raw):
+                return label_by_upper.get((lista_raw or "").strip().upper())
+
+            moves_canon = []
+            for mv in moves:
+                canon = canon_label(mv["lista"])
+                if canon:
+                    moves_canon.append({**mv, "lista": canon})
+
             # ini de uma etapa = quando o card entrou na lista correspondente (1ª ocorrência).
             entradas = {}
-            for mv in moves:
-                if mv["lista"] in label_set and mv["lista"] not in entradas:
+            for mv in moves_canon:
+                if mv["lista"] not in entradas:
                     entradas[mv["lista"]] = mv["data"]
             # fim de uma etapa = data de entrada na PRÓXIMA lista relevante que ele efetivamente visitou.
-            visited_in_order = [mv for mv in moves if mv["lista"] in label_set]
+            visited_in_order = moves_canon
             for i, mv in enumerate(visited_in_order):
                 stages.setdefault(mv["lista"], {"ini": entradas.get(mv["lista"]), "fim": None})
                 if i + 1 < len(visited_in_order):
@@ -304,7 +353,7 @@ def main():
             "unidade_label": ({"1": "Unidade 1", "2": "Unidade 2", "3": "Unidade 3", "4": "Unidade 4"}.get(unidade_num, "Plano de Ensino") if tipo else None),
             "tipo": tipo,
             "pipeline": pipeline,
-            "macro_fase": LIST_TO_MACRO.get(etapa_atual.upper(), "Outro"),
+            "macro_fase": resolve_macro_fase(etapa_atual.upper()),
             "etapa_atual": etapa_atual.upper(),
             "arquivado": arquivado,
             "template_teste": template_teste,
@@ -329,7 +378,7 @@ def main():
     )
     disciplinas = []
     for codigo, d in disciplinas_map.items():
-        tema_cards = [c for c in d["cards"] if c["tipo"] == "TEMA"]
+        tema_cards = [c for c in d["cards"] if is_tema_tipo(c["tipo"])]
         unidades_concluidas = sum(
             1 for c in tema_cards
             if c["stages"].get("Tester Conteúdo", {}).get("fim")
