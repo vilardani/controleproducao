@@ -505,6 +505,8 @@
   function d1(x){ return (x===null||x===undefined||isNaN(x)) ? '—' : fmt1.format(x); }
   function pct(x){ return (x===null||x===undefined) ? '—' : fmt1.format(x)+'%'; }
   function esc(s){ return (s===null||s===undefined) ? '' : String(s).replace(/[&<>"']/g, function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+  // Card "Tema" tem um tipo por unidade (T1..T4) em vez do literal "TEMA" (espelha build_data.py).
+  function isTemaTipo(tipo){ return tipo==='TEMA' || /^T[1-4]$/.test(tipo||''); }
 
   var CAT = {
     tipo: {TEMA:'var(--cat-1)', INF:'var(--cat-2)', QUIZ:'var(--cat-3)', POD:'var(--cat-4)', PE:'var(--cat-5)'},
@@ -896,7 +898,7 @@
   // ================= Visão Geral =================
   function renderVisaoGeral(cards){
     var m = DATA.meta;
-    var temaCards = cards.filter(function(c){ return c.pipeline==='conteudo' && c.tipo==='TEMA' && !c.template_teste; });
+    var temaCards = cards.filter(function(c){ return c.pipeline==='conteudo' && isTemaTipo(c.tipo) && !c.template_teste; });
     var videoCards = cards.filter(function(c){ return c.pipeline==='video' && !c.template_teste; });
     var tema = leadTimeOf(temaCards, STAGE_DEFS.TEMA) || {mediana:null,p90:null};
     var video = leadTimeOf(videoCards, STAGE_DEFS.VIDEO) || {mediana:null,p90:null};
@@ -1005,7 +1007,7 @@
 
   function renderConteudo(cards){
     var content = cards.filter(function(c){ return c.pipeline==='conteudo' && !c.template_teste; });
-    var temaCards = content.filter(function(c){ return c.tipo==='TEMA'; });
+    var temaCards = content.filter(function(c){ return isTemaTipo(c.tipo); });
     renderFunnelByUnit(document.getElementById('funil-tema'), buildFunnelByUnit(temaCards, STAGE_DEFS.TEMA).etapas);
     document.getElementById('funil-tema-legend').innerHTML = UNIT_LEGEND;
 
@@ -1481,7 +1483,9 @@
       });
     }
     fillSelect('f-pipeline', ['conteudo','video','bdq','extras'], PIPE_LABEL);
-    fillSelect('f-tipo', ['TEMA','INF','QUIZ','POD','PE','BDQ','CONC','PEV','EDUV'], TIPO_LABEL);
+    var tiposPresentes = {};
+    CARDS.forEach(function(c){ if(c.tipo) tiposPresentes[c.tipo] = true; });
+    fillSelect('f-tipo', Object.keys(tiposPresentes).sort(), TIPO_LABEL);
     fillSelect('f-fase', ['Intake','Produção Conteúdo','Produção Vídeo','Publicação','Concluído','Outro']);
   })();
 

@@ -91,6 +91,30 @@ def trello_get_paginated_actions(board_id, filter_types, limit=1000):
     return out
 
 
+def trello_get_paginated_cards(board_id, limit=1000, **params):
+    """Pagina /boards/{id}/cards/all usando o cursor `before` (id do card).
+
+    O limite máximo por chamada da API do Trello é 1000 — sem paginação,
+    boards com mais de 1000 cards (ativos + arquivados) ficariam truncados
+    silenciosamente.
+    """
+    out = []
+    before = None
+    while True:
+        qs = dict(params)
+        qs["limit"] = limit
+        if before:
+            qs["before"] = before
+        batch = trello_get(f"/boards/{board_id}/cards/all", **qs)
+        if not batch:
+            break
+        out.extend(batch)
+        if len(batch) < limit:
+            break
+        before = batch[-1]["id"]
+    return out
+
+
 # ---------------------------------------------------------------------------
 # Constantes que espelham o front-end (index.html) — mantenha em sincronia.
 # ---------------------------------------------------------------------------
@@ -245,10 +269,9 @@ def main():
     member_name_by_id = {m["id"]: m.get("fullName") or m.get("username") for m in members}
 
     print("Buscando cards (ativos + arquivados)...", file=sys.stderr)
-    cards_raw = trello_get(
-        f"/boards/{BOARD_ID}/cards/all",
+    cards_raw = trello_get_paginated_cards(
+        BOARD_ID,
         fields="name,idList,due,dateLastActivity,shortUrl,closed,idMembers,labels",
-        limit=1000,
     )
     print(f"  {len(cards_raw)} cards.", file=sys.stderr)
 
