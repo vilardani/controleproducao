@@ -206,7 +206,10 @@ TEAM_ROSTER = {
 PESSOA_TO_EQUIPE = {}
 for equipe, pessoas in TEAM_ROSTER.items():
     for p in pessoas:
-        PESSOA_TO_EQUIPE[p] = equipe
+        # Nomes vêm em Title Case do histórico de ações (fullName do membro) mas
+        # em CAIXA ALTA dos Custom Fields (opções de dropdown) — casa por
+        # maiúsculo para cobrir os dois casos.
+        PESSOA_TO_EQUIPE[p.upper()] = equipe
 
 # Unidade "U1".."U4" (conteúdo) ou "V1".."V4" (vídeo) ou "PE" isolado (plano de ensino).
 # "projeto" usa [^_]+ (em vez de [A-Z0-9.]+) porque projetos como "PÓS" têm acento.
@@ -271,8 +274,71 @@ def resolve_pessoa_equipe(nome_membro):
     if "(EXTERNO)" in nome_membro.upper():
         return nome_membro, "Externo"
     primeiro_nome = nome_membro.strip().split()[0]
-    equipe = PESSOA_TO_EQUIPE.get(primeiro_nome, "Não mapeado")
+    equipe = PESSOA_TO_EQUIPE.get(primeiro_nome.upper(), "Não mapeado")
     return nome_membro, equipe
+
+
+# Para TEMA/OBJ, o board tem Custom Fields dedicados de responsável e datas por
+# etapa (achado ao comparar com um CSV exportado do Trello) — muito mais
+# confiável que inferir pelo histórico de movimentação, que não cobre cards
+# fora da janela de retenção de ações do Trello. Vídeo/BDQ continuam usando o
+# histórico de movimentação (o mapeamento de campos lá não é tão direto).
+# Etapa (STAGE_DEFS) -> (nome do campo de responsável, sufixo dos campos de data
+# "DT INÍCIO {sufixo}" / "DT FIM {sufixo}") — nomes exatamente como no Trello.
+STAGE_CUSTOM_FIELD = {
+    "Qualidade 01": ("QUALIDADE 01", "QLD 01"),
+    "Qualidade 02": ("QUALIDADE 02", "QLD 02"),
+    "DI": ("DI", "DI"),
+    "Tester DI": ("TESTER ÁREA", "TESTER"),
+    "Revisão": ("REVISOR", "REV"),
+    "DG": ("DG", "DG"),
+    "Web": ("WEB", "WEB"),
+    "Tester Conteúdo": ("TESTER CONTEÚDO", "TST CONTEÚDO"),
+}
+
+
+def fetch_custom_field_defs(board_id):
+    """Busca as definições de Custom Fields do board (id -> nome/tipo/opções)."""
+    fields = trello_get(f"/boards/{board_id}/customFields")
+    defs = {}
+    for f in fields:
+        options = {}
+        if f.get("type") == "list":
+            for opt in f.get("options", []):
+                options[opt["id"]] = opt.get("value", {}).get("text")
+        defs[f["id"]] = {"name": f["name"], "type": f.get("type"), "options": options}
+    return defs
+
+
+def build_custom_values(card, field_defs):
+    """Resolve os Custom Field Items de um card para {nome_do_campo: valor}."""
+    values = {}
+    for item in card.get("customFieldItems") or []:
+        fdef = field_defs.get(item.get("idCustomField"))
+        if not fdef:
+            continue
+        val = item.get("value") or {}
+        if fdef["type"] == "list":
+            resolved = fdef["options"].get(item.get("idValue"))
+        elif "text" in val:
+            resolved = val["text"]
+        elif "date" in val:
+            resolved = val["date"]
+        elif "number" in val:
+            resolved = val["number"]
+        elif "checked" in val:
+            resolved = val["checked"]
+        else:
+            resolved = None
+        if resolved not in (None, ""):
+            values[fdef["name"]] = resolved
+    return values
+
+
+def card_created_at(card_id):
+    """Data de criação do card, decodificada do próprio ObjectId (sempre disponível,
+    ao contrário do histórico de ações, que tem janela de retenção limitada)."""
+    return datetime.fromtimestamp(int(card_id[:8], 16), tz=timezone.utc).isoformat()
 
 
 def main():
@@ -286,10 +352,14 @@ def main():
     members = trello_get(f"/boards/{BOARD_ID}/members", fields="fullName,username")
     member_name_by_id = {m["id"]: m.get("fullName") or m.get("username") for m in members}
 
+    print("Buscando Custom Fields do board...", file=sys.stderr)
+    custom_field_defs = fetch_custom_field_defs(BOARD_ID)
+
     print("Buscando cards (ativos + arquivados)...", file=sys.stderr)
     cards_raw = trello_get_all_cards(
         BOARD_ID, lists,
         fields="name,idList,due,dateLastActivity,shortUrl,closed,idMembers,labels",
+        customFieldItems="true",
     )
     print(f"  {len(cards_raw)} cards.", file=sys.stderr)
 
@@ -337,7 +407,38 @@ def main():
         moves = moves_by_card.get(c["id"], [])
         stages = {}
         resp_stages = []
-        if stage_key:
+        custom = build_custom_values(c, custom_field_defs)
+
+        if stage_key in ("TEMA", "OBJ"):
+            # Conteúdo (Tema/Objetos): lê direto dos Custom Fields de
+            # responsável e data por etapa — mais preciso que inferir pelo
+            # histórico de movimentação, e não depende da janela de retenção
+            # de ações do Trello.
+            labels = STAGE_DEFS[stage_key]
+            for lbl in labels:
+                stages.setdefault(lbl, {"ini": None, "fim": None})
+            for lbl, (pessoa_field, date_suffix) in STAGE_CUSTOM_FIELD.items():
+                if lbl not in labels:
+                    continue
+                ini = custom.get(f"DT INÍCIO {date_suffix}")
+                fim = custom.get(f"DT FIM {date_suffix}")
+                if ini:
+                    stages[lbl]["ini"] = ini
+                if fim:
+                    stages[lbl]["fim"] = fim
+                pessoa_nome = custom.get(pessoa_field)
+                if pessoa_nome and fim:
+                    pessoa, equipe = resolve_pessoa_equipe(pessoa_nome)
+                    resp_stages.append({"pessoa": pessoa, "equipe": equipe, "etapa": lbl, "data": fim})
+            criado_em = card_created_at(c["id"])
+            stages["Recebimento"] = {"ini": criado_em, "fim": criado_em}
+            if "Finalizado" in labels and macro_fase == "Concluído" and c.get("dateLastActivity"):
+                stages["Finalizado"] = {"ini": c["dateLastActivity"], "fim": c["dateLastActivity"]}
+        elif stage_key:
+            # Vídeo/BDQ: mapeamento de Custom Field por etapa não é tão direto
+            # (o board tem campos como "LIBERAÇÃO GRAVAÇÃO" sem correspondência
+            # clara com STAGE_DEFS.VIDEO) — continua pelo histórico de
+            # movimentação entre listas.
             labels = STAGE_DEFS[stage_key]
             # Listas do Trello vêm em CAIXA ALTA; STAGE_DEFS usa Title Case para exibição.
             # Casa por nome normalizado (maiúsculo) e devolve o rótulo "bonito" canônico.
@@ -372,15 +473,7 @@ def main():
                     })
             for lbl in labels:
                 stages.setdefault(lbl, {"ini": None, "fim": None})
-            # Recebimento = entrada do card no board (sem lista anterior) -> data de criação.
-            if not stages["Recebimento"]["ini"] and moves:
-                stages["Recebimento"]["ini"] = moves[0]["data"]
-                stages["Recebimento"]["fim"] = stages["Recebimento"]["ini"]
-            # "Finalizado" é uma etapa sintética: o card chegou numa lista de
-            # conclusão (macro-fase Concluído), mesmo que o histórico de
-            # movimentação não tenha capturado a data exata de cada etapa
-            # intermediária (comum em cards antigos, fora da janela de
-            # retenção de ações do Trello).
+            stages["Recebimento"] = {"ini": card_created_at(c["id"]), "fim": card_created_at(c["id"])}
             if "Finalizado" in labels and macro_fase == "Concluído" and c.get("dateLastActivity"):
                 stages["Finalizado"] = {"ini": c["dateLastActivity"], "fim": c["dateLastActivity"]}
 
@@ -411,7 +504,7 @@ def main():
             "data_conclusao": data_conclusao,
             "stages": stages,
             "resp_stages": resp_stages,
-            "tipo_conteudista": None,  # TODO: derive from Trello label/custom field once known
+            "tipo_conteudista": custom.get("TIPO CONTEUDISTA"),
             "grupo_extra": grupo_extra_de(nome, projeto) if pipeline == "extras" else None,
             "membros": ", ".join(membros_nomes),
         }
