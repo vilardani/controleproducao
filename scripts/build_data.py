@@ -139,7 +139,7 @@ def trello_get_all_cards(board_id, lists, **params):
 STAGE_DEFS = {
     "TEMA": ["Recebimento", "Qualidade 01", "Qualidade 02", "DI", "Tester DI", "Revisão", "DG", "Web", "Tester Conteúdo", "Finalizado"],
     "OBJ":  ["Recebimento", "Qualidade 02", "Revisão", "DG", "Web", "Tester Conteúdo", "Finalizado"],
-    "VIDEO": ["Recebimento", "Roteiro", "Liberação Conteudista", "Gravação", "Edição", "Web", "Tester Conteúdo"],
+    "VIDEO": ["Recebimento", "Roteiro", "Liberação Conteudista", "Gravação", "Edição", "Web", "Tester Conteúdo", "Finalizado"],
     "BDQ":  ["Recebimento", "Web (publicado)"],
 }
 
