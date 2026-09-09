@@ -1031,7 +1031,9 @@
       }).join('');
       return '<div class="card pad mini-funnel"><h3>'+objLabel[code]+' <span class="foot-note" style="display:inline">('+n(f.total)+')</span></h3><div class="funnel" style="margin-top:8px">'+rows+'</div></div>';
     }).join('');
-    var peCards = content.filter(function(c){ return c.tipo==='PE'; });
+    // Plano de Ensino é identificado pela unidade (PE, sem número), não pelo tipo —
+    // o tipo real desses cards varia (ex.: INT), só a unidade é sempre "PE".
+    var peCards = content.filter(function(c){ return c.unidade_num===null; });
     var fPe = buildFunnelFlow(peCards, STAGE_DEFS.OBJ);
     var htmlPe;
     if(!fPe.total){
