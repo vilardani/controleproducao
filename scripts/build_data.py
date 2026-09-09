@@ -477,6 +477,14 @@ def main():
             if "Finalizado" in labels and macro_fase == "Concluído" and c.get("dateLastActivity"):
                 stages["Finalizado"] = {"ini": c["dateLastActivity"], "fim": c["dateLastActivity"]}
 
+        # Arquivado sem nenhuma movimentação registrada (nenhum Custom Field nem
+        # histórico de lista além da entrada) = card sem produção real, nunca
+        # chegou a começar. Trata como template_teste para sair de toda análise.
+        if stage_key and arquivado and not any(
+            v.get("fim") for lbl, v in stages.items() if lbl != "Recebimento"
+        ):
+            template_teste = True
+
         dias_parado = round((now - datetime.fromisoformat(c["dateLastActivity"].replace("Z", "+00:00"))).total_seconds() / 86400, 1) if c.get("dateLastActivity") else None
 
         last_label = STAGE_DEFS[stage_key][-1] if stage_key else None
