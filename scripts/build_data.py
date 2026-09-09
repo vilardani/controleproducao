@@ -91,28 +91,45 @@ def trello_get_paginated_actions(board_id, filter_types, limit=1000):
     return out
 
 
-def trello_get_all_cards(board_id, lists, **params):
-    """Busca todos os cards do board, lista por lista.
+def trello_get_list_cards_paginated(list_id, limit=1000, max_pages=25, **params):
+    """Busca todos os cards de uma lista, paginando com o cursor `before` (id do card).
 
-    /boards/{id}/cards/all não pagina de forma confiável com `before`/`since`
-    (testado: gera cards duplicados em vez de avançar o cursor). Como o limite
-    da API por chamada é 1000, buscamos por lista (/lists/{id}/cards, bem
-    menos provável de passar de 1000 cards numa única lista) e avisamos no
-    log caso alguma lista bata exatamente no teto, para revisão manual.
+    O cursor `before` do endpoint de cards do Trello não é 100% confiável
+    (testado: pode devolver cards repetidos em vez de avançar direito).
+    Para não arriscar loop infinito nem perder cards, deduplica por id e só
+    para quando uma página não trouxer nenhum card novo (ou o número de
+    páginas passar de `max_pages`, como cinto de segurança).
     """
+    seen = set()
     out = []
-    for lst in lists:
+    before = None
+    for _ in range(max_pages):
         qs = dict(params)
         qs.setdefault("filter", "all")
-        qs["limit"] = 1000
-        batch = trello_get(f"/lists/{lst['id']}/cards", **qs)
-        if len(batch) >= 1000:
-            print(
-                f"  aviso: lista '{lst['name']}' retornou {len(batch)} cards "
-                "(pode estar truncada no limite da API; revisar manualmente).",
-                file=sys.stderr,
-            )
-        out.extend(batch)
+        qs["limit"] = limit
+        if before:
+            qs["before"] = before
+        batch = trello_get(f"/lists/{list_id}/cards", **qs)
+        if not batch:
+            break
+        novos = 0
+        for card in batch:
+            if card["id"] not in seen:
+                seen.add(card["id"])
+                out.append(card)
+                novos += 1
+        if len(batch) < limit or novos == 0:
+            break
+        before = batch[-1]["id"]
+    return out
+
+
+def trello_get_all_cards(board_id, lists, **params):
+    """Busca todos os cards do board, lista por lista (paginando cada uma)."""
+    out = []
+    for lst in lists:
+        cards = trello_get_list_cards_paginated(lst["id"], **params)
+        out.extend(cards)
     return out
 
 
@@ -120,8 +137,8 @@ def trello_get_all_cards(board_id, lists, **params):
 # Constantes que espelham o front-end (index.html) — mantenha em sincronia.
 # ---------------------------------------------------------------------------
 STAGE_DEFS = {
-    "TEMA": ["Recebimento", "Qualidade 01", "Qualidade 02", "DI", "Tester DI", "Revisão", "DG", "Web", "Tester Conteúdo"],
-    "OBJ":  ["Recebimento", "Qualidade 02", "Revisão", "DG", "Web", "Tester Conteúdo"],
+    "TEMA": ["Recebimento", "Qualidade 01", "Qualidade 02", "DI", "Tester DI", "Revisão", "DG", "Web", "Tester Conteúdo", "Finalizado"],
+    "OBJ":  ["Recebimento", "Qualidade 02", "Revisão", "DG", "Web", "Tester Conteúdo", "Finalizado"],
     "VIDEO": ["Recebimento", "Roteiro", "Liberação Conteudista", "Gravação", "Edição", "Web", "Tester Conteúdo"],
     "BDQ":  ["Recebimento", "Web (publicado)"],
 }
@@ -315,6 +332,7 @@ def main():
 
         pipeline, stage_key = pipeline_and_stage_def(tipo) if tipo else ("extras", None)
         template_teste = "TESTE" in nome.upper() or "MODELO" in nome.upper()
+        macro_fase = resolve_macro_fase(etapa_atual.upper())
 
         moves = moves_by_card.get(c["id"], [])
         stages = {}
@@ -358,6 +376,13 @@ def main():
             if not stages["Recebimento"]["ini"] and moves:
                 stages["Recebimento"]["ini"] = moves[0]["data"]
                 stages["Recebimento"]["fim"] = stages["Recebimento"]["ini"]
+            # "Finalizado" é uma etapa sintética: o card chegou numa lista de
+            # conclusão (macro-fase Concluído), mesmo que o histórico de
+            # movimentação não tenha capturado a data exata de cada etapa
+            # intermediária (comum em cards antigos, fora da janela de
+            # retenção de ações do Trello).
+            if "Finalizado" in labels and macro_fase == "Concluído" and c.get("dateLastActivity"):
+                stages["Finalizado"] = {"ini": c["dateLastActivity"], "fim": c["dateLastActivity"]}
 
         dias_parado = round((now - datetime.fromisoformat(c["dateLastActivity"].replace("Z", "+00:00"))).total_seconds() / 86400, 1) if c.get("dateLastActivity") else None
 
@@ -378,7 +403,7 @@ def main():
             "unidade_label": ({"1": "Unidade 1", "2": "Unidade 2", "3": "Unidade 3", "4": "Unidade 4"}.get(unidade_num, "Plano de Ensino") if tipo else None),
             "tipo": tipo,
             "pipeline": pipeline,
-            "macro_fase": resolve_macro_fase(etapa_atual.upper()),
+            "macro_fase": macro_fase,
             "etapa_atual": etapa_atual.upper(),
             "arquivado": arquivado,
             "template_teste": template_teste,

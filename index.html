@@ -1008,7 +1008,7 @@
   function renderConteudo(cards){
     var content = cards.filter(function(c){ return c.pipeline==='conteudo' && !c.template_teste; });
     var temaCards = content.filter(function(c){ return isTemaTipo(c.tipo); });
-    renderFunnelByUnit(document.getElementById('funil-tema'), buildFunnelByUnit(temaCards, STAGE_DEFS.TEMA).etapas);
+    renderFunnelByUnit(document.getElementById('funil-tema'), buildFunnelByUnit(temaCards, STAGE_DEFS.TEMA, true).etapas);
     document.getElementById('funil-tema-legend').innerHTML = UNIT_LEGEND;
 
     // Plano de Ensino é um card único por disciplina (unidade "PE", não U1-U4) — não tem o que
@@ -1017,7 +1017,7 @@
     var objLabel = {INF:'Infográfico', QUIZ:'Quiz', POD:'Podcast', PE:'Plano de Ensino'};
     var htmlPorUnidade = codesPorUnidade.map(function(code){
       var sub = content.filter(function(c){ return c.tipo===code; });
-      var f = buildFunnelByUnit(sub, STAGE_DEFS.OBJ);
+      var f = buildFunnelByUnit(sub, STAGE_DEFS.OBJ, true);
       if(!f.total) return '<div class="card pad mini-funnel"><h3>'+objLabel[code]+' <span class="foot-note" style="display:inline">(0)</span></h3><div class="foot-note" style="margin-top:8px">Nenhum card nesta seleção.</div></div>';
       var max = f.etapas[0].n || 1;
       var rows = f.etapas.map(function(e){
@@ -1032,7 +1032,7 @@
       return '<div class="card pad mini-funnel"><h3>'+objLabel[code]+' <span class="foot-note" style="display:inline">('+n(f.total)+')</span></h3><div class="funnel" style="margin-top:8px">'+rows+'</div></div>';
     }).join('');
     var peCards = content.filter(function(c){ return c.tipo==='PE'; });
-    var fPe = buildFunnel(peCards, STAGE_DEFS.OBJ);
+    var fPe = buildFunnelFlow(peCards, STAGE_DEFS.OBJ);
     var htmlPe;
     if(!fPe.total){
       htmlPe = '<div class="card pad mini-funnel"><h3>Plano de Ensino <span class="foot-note" style="display:inline">(0)</span></h3><div class="foot-note" style="margin-top:8px">Nenhum card nesta seleção.</div></div>';
@@ -1056,7 +1056,7 @@
         '<div class="hbar-track"><div class="hbar-fill" style="background:'+UNIT_COLOR[u.unidade_num]+';width:'+last.pct+'%"></div></div>'+
         '<div class="hbar-nums"><b>'+n(last.n)+'</b>/'+n(u.total)+' · '+pct(last.pct)+'</div></div>';
     }).join('');
-    document.getElementById('tema-unidade').innerHTML = rows + '<div class="foot-note">% de Temas com Tester de Conteúdo concluído, por unidade.</div>';
+    document.getElementById('tema-unidade').innerHTML = rows + '<div class="foot-note">% de Temas Finalizados, por unidade.</div>';
   }
 
   // ================= Banco de Questões =================
