@@ -203,6 +203,7 @@
       <span class="gf-label">Filtros</span>
       <select id="gf-disciplina" aria-label="Filtrar por código ou disciplina"><option value="">Código / disciplina — todas</option></select>
       <select id="gf-unidade" aria-label="Filtrar por unidade"><option value="">Unidade — todas</option></select>
+      <select id="gf-produto" aria-label="Filtrar por produto"><option value="">Produto — todos</option></select>
       <button class="btn" id="gf-clear" style="display:none">Limpar filtros</button>
       <span class="gf-hint">Aplicam-se a todas as abas do painel.</span>
     </div>
@@ -756,11 +757,13 @@
   // ---------------- global filters: código/disciplina + unidade (apply to every panel) ----------------
   var currentDiscipline = '';
   var currentUnidade = '';
+  var currentProduto = '';
   var ALL_CARDS = DATA.cards;
   function scopedCards(){
     return ALL_CARDS.filter(function(c){
       if(currentDiscipline && c.codigo!==currentDiscipline) return false;
       if(currentUnidade && c.unidade_num!==currentUnidade) return false;
+      if(currentProduto && c.projeto!==currentProduto) return false;
       return true;
     });
   }
@@ -775,21 +778,30 @@
       var opt = document.createElement('option'); opt.value = u; opt.textContent = UNIDADE_LABEL[u];
       selUnid.appendChild(opt);
     });
+    var selProd = document.getElementById('gf-produto');
+    var produtos = {};
+    ALL_CARDS.forEach(function(c){ if(c.projeto) produtos[c.projeto] = true; });
+    Object.keys(produtos).sort().forEach(function(p){
+      var opt = document.createElement('option'); opt.value = p; opt.textContent = p;
+      selProd.appendChild(opt);
+    });
     var clearBtn = document.getElementById('gf-clear');
     var bar = document.getElementById('global-filter');
     function onChange(){
       currentDiscipline = selDisc.value;
       currentUnidade = selUnid.value;
-      var active = !!(currentDiscipline || currentUnidade);
+      currentProduto = selProd.value;
+      var active = !!(currentDiscipline || currentUnidade || currentProduto);
       clearBtn.style.display = active ? '' : 'none';
       bar.classList.toggle('active', active);
       renderAll();
     }
     selDisc.addEventListener('change', onChange);
     selUnid.addEventListener('change', onChange);
+    selProd.addEventListener('change', onChange);
     clearBtn.addEventListener('click', function(){
-      selDisc.value = ''; selUnid.value = '';
-      currentDiscipline = ''; currentUnidade = '';
+      selDisc.value = ''; selUnid.value = ''; selProd.value = '';
+      currentDiscipline = ''; currentUnidade = ''; currentProduto = '';
       clearBtn.style.display = 'none';
       bar.classList.remove('active');
       renderAll();
@@ -808,6 +820,7 @@
       filtros.push(d ? (d.codigo+' — '+d.nome) : currentDiscipline);
     }
     if(currentUnidade) filtros.push(UNIDADE_LABEL[currentUnidade]);
+    if(currentProduto) filtros.push(currentProduto);
     if(filtros.length) txt += ' · filtrado por ' + filtros.join(' · ');
     document.getElementById('meta-line').textContent = txt;
   }

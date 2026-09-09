@@ -349,6 +349,7 @@ def main():
             "url": c.get("shortUrl"),
             "codigo": codigo,
             "disciplina": disciplina,
+            "projeto": projeto,
             "unidade_num": unidade_num,
             "unidade_label": ({"1": "Unidade 1", "2": "Unidade 2", "3": "Unidade 3", "4": "Unidade 4"}.get(unidade_num, "Plano de Ensino") if tipo else None),
             "tipo": tipo,
