@@ -137,11 +137,13 @@ def trello_get_all_cards(board_id, lists, **params):
 # Constantes que espelham o front-end (index.html) — mantenha em sincronia.
 # ---------------------------------------------------------------------------
 STAGE_DEFS = {
-    "TEMA": ["Recebimento", "Qualidade 01", "Qualidade 02", "DI", "Tester DI", "Revisão", "DG", "Web", "Tester Conteúdo", "Finalizado"],
-    "OBJ":  ["Recebimento", "Qualidade 02", "Revisão", "DG", "Web", "Tester Conteúdo", "Finalizado"],
-    "VIDEO": ["Recebimento", "Roteiro", "Liberação Conteudista", "Gravação", "Edição", "Web", "Tester Conteúdo", "Finalizado"],
+    "TEMA": ["Recebimento", "Qualidade 01", "Qualidade 02", "DI", "Revisão", "DG", "Web", "Finalizado"],
+    "OBJ":  ["Recebimento", "Qualidade 02", "Revisão", "DG", "Web", "Finalizado"],
+    "VIDEO": ["Recebimento", "Roteiro", "Liberação Conteudista", "Gravação", "Edição", "Web", "Finalizado"],
     "BDQ":  ["Recebimento", "Web (publicado)"],
 }
+# Tester DI e Tester Conteúdo saíram do controle (viram auditoria da
+# liderança, não são mais etapa obrigatória rastreada no funil).
 
 # Lista (nome em maiúsculas, como aparece no Trello) -> macro-fase.
 # Ajuste aqui se os nomes das listas do board real forem diferentes.
@@ -193,23 +195,24 @@ def resolve_macro_fase(etapa_upper):
 # Etapas com "responsável" — nomes exatamente como usados no front-end (STAGE_DEFS),
 # usados para popular resp_stages / a aba "Funções".
 FUNCAO_RELEVANT_STAGES = {
-    "Qualidade 01", "Qualidade 02", "Tester DI", "Tester Conteúdo", "DI", "DG",
-    "Revisão", "Roteiro Revisão", "Liberação Conteudista", "Gravação", "Edição", "Web",
+    "Qualidade 01", "Qualidade 02", "DI", "DG",
+    "Revisão", "Roteiro", "Liberação Conteudista", "Gravação", "Edição", "Web",
 }
 
-# Roster conhecido — ajuste/complete conforme a composição real das equipes.
-TEAM_ROSTER = {
-    "Desenho Educacional": ["Giselly", "Amanda", "Roberta", "Solange", "Anderson"],
-    "Soluções Educacionais": ["Thiago", "Vinicius"],
-    "Design e Mídia Digital": ["Olivia", "Andressa", "Cristiane", "David", "Fabio", "Gustavo", "Lucas", "Matheus"],
+# Equipe é definida pela ETAPA concluída, não por quem é a pessoa — organização
+# real das 4 áreas (2026).
+STAGE_TO_EQUIPE = {
+    "Qualidade 01": "Desenho Educacional",
+    "Qualidade 02": "Desenho Educacional",
+    "DI": "Desenho Educacional",
+    "Revisão": "Desenho Educacional",
+    "DG": "Design Educacional",
+    "Roteiro": "Mídia Digital",
+    "Liberação Conteudista": "Mídia Digital",
+    "Gravação": "Mídia Digital",
+    "Edição": "Mídia Digital",
+    "Web": "Soluções Educacionais",
 }
-PESSOA_TO_EQUIPE = {}
-for equipe, pessoas in TEAM_ROSTER.items():
-    for p in pessoas:
-        # Nomes vêm em Title Case do histórico de ações (fullName do membro) mas
-        # em CAIXA ALTA dos Custom Fields (opções de dropdown) — casa por
-        # maiúsculo para cobrir os dois casos.
-        PESSOA_TO_EQUIPE[p.upper()] = equipe
 
 # Unidade "U1".."U4" (conteúdo) ou "V1".."V4" (vídeo) ou "PE" isolado (plano de ensino).
 # "projeto" usa [^_]+ (em vez de [A-Z0-9.]+) porque projetos como "PÓS" têm acento.
@@ -268,14 +271,14 @@ def grupo_extra_de(nome, projeto):
     return "Avulso / fora do padrão"
 
 
-def resolve_pessoa_equipe(nome_membro):
+def resolve_equipe(nome_membro, etapa):
+    """Equipe é derivada da ETAPA concluída (STAGE_TO_EQUIPE), não da pessoa —
+    exceto para externos, que ficam numa equipe própria independente da etapa."""
     if not nome_membro:
         return "Não identificado", "Não mapeado"
     if "(EXTERNO)" in nome_membro.upper():
         return nome_membro, "Externo"
-    primeiro_nome = nome_membro.strip().split()[0]
-    equipe = PESSOA_TO_EQUIPE.get(primeiro_nome.upper(), "Não mapeado")
-    return nome_membro, equipe
+    return nome_membro, STAGE_TO_EQUIPE.get(etapa, "Não mapeado")
 
 
 # Para TEMA/OBJ, o board tem Custom Fields dedicados de responsável e datas por
@@ -289,11 +292,9 @@ STAGE_CUSTOM_FIELD = {
     "Qualidade 01": ("QUALIDADE 01", "QLD 01"),
     "Qualidade 02": ("QUALIDADE 02", "QLD 02"),
     "DI": ("DI", "DI"),
-    "Tester DI": ("TESTER ÁREA", "TESTER"),
     "Revisão": ("REVISOR", "REV"),
     "DG": ("DG", "DG"),
     "Web": ("WEB", "WEB"),
-    "Tester Conteúdo": ("TESTER CONTEÚDO", "TST CONTEÚDO"),
 }
 
 
@@ -428,7 +429,7 @@ def main():
                     stages[lbl]["fim"] = fim
                 pessoa_nome = custom.get(pessoa_field)
                 if pessoa_nome and fim:
-                    pessoa, equipe = resolve_pessoa_equipe(pessoa_nome)
+                    pessoa, equipe = resolve_equipe(pessoa_nome, lbl)
                     resp_stages.append({"pessoa": pessoa, "equipe": equipe, "etapa": lbl, "data": fim})
             criado_em = card_created_at(c["id"])
             stages["Recebimento"] = {"ini": criado_em, "fim": criado_em}
@@ -466,7 +467,7 @@ def main():
                     stages[mv["lista"]]["fim"] = visited_in_order[i + 1]["data"]
                 autor_nome = member_name_by_id.get(mv["autor_id"])
                 if mv["lista"] in FUNCAO_RELEVANT_STAGES and i + 1 < len(visited_in_order):
-                    pessoa, equipe = resolve_pessoa_equipe(autor_nome)
+                    pessoa, equipe = resolve_equipe(autor_nome, mv["lista"])
                     resp_stages.append({
                         "pessoa": pessoa, "equipe": equipe,
                         "etapa": mv["lista"], "data": visited_in_order[i + 1]["data"],
@@ -516,6 +517,7 @@ def main():
             "stages": stages,
             "resp_stages": resp_stages,
             "tipo_conteudista": custom.get("TIPO CONTEUDISTA"),
+            "qtd_caracteres": custom.get("QTD CARACTERES"),
             "grupo_extra": grupo_extra_de(nome, projeto) if pipeline == "extras" else None,
             "membros": ", ".join(membros_nomes),
         }
@@ -535,7 +537,7 @@ def main():
         tema_cards = [c for c in d["cards"] if is_tema_tipo(c["tipo"])]
         unidades_concluidas = sum(
             1 for c in tema_cards
-            if c["stages"].get("Tester Conteúdo", {}).get("fim")
+            if c["stages"].get("Finalizado", {}).get("fim")
         )
         disciplinas.append({
             "codigo": codigo,

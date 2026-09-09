@@ -2,11 +2,9 @@ name: Atualizar dados do Trello
 
 on:
   schedule:
-    # A cada 6 horas. Ajuste conforme a necessidade (min 5 em 5 min é o
-    # limite técnico do GitHub Actions, mas não há motivo para ir tão rápido
-    # aqui — o board não muda tão depressa e cada execução faz muitas
-    # chamadas à API do Trello).
-    - cron: "0 */6 * * *"
+    # A cada hora. Cada execução leva uns 3-4 minutos e faz várias chamadas
+    # à API do Trello — ir mais rápido que isso não traz ganho real.
+    - cron: "0 * * * *"
   workflow_dispatch: {}   # permite rodar manualmente pela aba "Actions" no GitHub
 
 permissions:

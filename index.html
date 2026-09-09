@@ -245,7 +245,7 @@
     <section>
       <div class="section-head">
         <h2>Funil — Tema (fluxo completo)</h2>
-        <div class="section-sub">Cards do tipo Tema (T2/T3/T4), únicos que passam pelas 8 etapas de qualidade e revisão do conteúdo textual. Cada barra é dividida por unidade.</div>
+        <div class="section-sub">Cards do tipo Tema (T2/T3/T4), únicos que passam pelas 6 etapas de qualidade e revisão do conteúdo textual (Tester DI e Tester Conteúdo viraram auditoria da liderança, não são mais etapa rastreada). Cada barra é dividida por unidade.</div>
       </div>
       <div class="card pad"><div class="funnel" id="funil-tema"></div><div class="legend" id="funil-tema-legend"></div></div>
     </section>
@@ -253,7 +253,7 @@
     <section>
       <div class="section-head">
         <h2>Objetos de aprendizagem por tipo</h2>
-        <div class="section-sub">Plano de Ensino, Infográfico, Quiz e Podcast seguem um fluxo mais curto (sem DI / Tester DI). O Banco de Questões tem quadro próprio na aba "Banco de Questões". Cada barra é dividida por unidade.</div>
+        <div class="section-sub">Plano de Ensino, Infográfico, Quiz e Podcast seguem um fluxo mais curto (sem DI). O Banco de Questões tem quadro próprio na aba "Banco de Questões". Cada barra é dividida por unidade.</div>
       </div>
       <div class="grid-auto" id="funil-objetos"></div>
       <div class="legend" id="funil-objetos-legend" style="margin-top:12px"></div>
@@ -404,7 +404,7 @@
     <section>
       <div class="section-head">
         <h2>Produtividade por função</h2>
-        <div class="section-sub">Etapas agrupadas por função de trabalho, não por equipe organizacional: Design Gráfico (DG), DI, Qualidade (Qualidade 01/02, Tester DI, Tester Conteúdo), Vídeo — todos (Liberação Conteudista, Gravação, Edição), Revisão (Revisão, Roteiro Revisão) e Webdesign (Web).</div>
+        <div class="section-sub">Etapas agrupadas por função de trabalho, não por equipe organizacional: Design Gráfico (DG), DI, Qualidade (Qualidade 01/02), Vídeo (Roteiro, Liberação Conteudista, Gravação, Edição), Revisão e Webdesign (Web).</div>
       </div>
       <div class="kpi-grid" id="kpi-funcoes"></div>
     </section>
@@ -512,7 +512,7 @@
     tipo: {TEMA:'var(--cat-1)', INF:'var(--cat-2)', QUIZ:'var(--cat-3)', POD:'var(--cat-4)', PE:'var(--cat-5)'},
     video: {CONC:'var(--cat-1)', PEV:'var(--cat-2)', EDUV:'var(--cat-3)'},
     pipeline: {conteudo:'var(--cat-1)', video:'var(--cat-2)', bdq:'var(--cat-5)', extras:'var(--ink-3)'},
-    equipe: {'Desenho Educacional':'var(--cat-1)', 'Soluções Educacionais':'var(--cat-2)', 'Design e Mídia Digital':'var(--cat-3)', 'Externo':'var(--cat-8)', 'Não mapeado':'var(--ink-3)'}
+    equipe: {'Desenho Educacional':'var(--cat-1)', 'Soluções Educacionais':'var(--cat-2)', 'Mídia Digital':'var(--cat-3)', 'Design Educacional':'var(--cat-4)', 'Externo':'var(--cat-8)', 'Não mapeado':'var(--ink-3)'}
   };
   var PIPE_LABEL = {conteudo:'Conteúdo', video:'Vídeo', bdq:'Banco de Questões', extras:'Extras'};
   var TIPO_LABEL = {TEMA:'Tema', INF:'Infográfico', QUIZ:'Quiz', POD:'Podcast', PE:'Plano de Ensino', BDQ:'Banco de Questões', CONC:'Conceituando', PEV:'Prática em Evidência', EDUV:'EADúvida'};
@@ -522,9 +522,9 @@
 
   // ---------------- stage definitions (mirror build_data.py *_STAGES, labels only) ----------------
   var STAGE_DEFS = {
-    TEMA:  ['Recebimento','Qualidade 01','Qualidade 02','DI','Tester DI','Revisão','DG','Web','Tester Conteúdo','Finalizado'],
-    OBJ:   ['Recebimento','Qualidade 02','Revisão','DG','Web','Tester Conteúdo','Finalizado'],
-    VIDEO: ['Recebimento','Roteiro','Liberação Conteudista','Gravação','Edição','Web','Tester Conteúdo','Finalizado'],
+    TEMA:  ['Recebimento','Qualidade 01','Qualidade 02','DI','Revisão','DG','Web','Finalizado'],
+    OBJ:   ['Recebimento','Qualidade 02','Revisão','DG','Web','Finalizado'],
+    VIDEO: ['Recebimento','Roteiro','Liberação Conteudista','Gravação','Edição','Web','Finalizado'],
     BDQ:   ['Recebimento','Web (publicado)']
   };
 
@@ -815,7 +815,7 @@
     var m = DATA.meta;
     var snap = m.snapshot_ate ? new Date(m.snapshot_ate) : null;
     var txt = 'Base: ' + n(m.total_cards) + ' cards · ' + n(m.total_disciplinas) + ' disciplinas';
-    if(snap) txt += ' · atualizado em ' + snap.toLocaleDateString('pt-BR');
+    if(snap) txt += ' · atualizado em ' + snap.toLocaleDateString('pt-BR') + ' às ' + snap.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
     var filtros = [];
     if(currentDiscipline){
       var d = DATA.disciplinas_lista.filter(function(x){ return x.codigo===currentDiscipline; })[0];
@@ -1261,7 +1261,7 @@
     }).join('') : '<tr><td colspan="5" class="foot-note">Sem registros nesta seleção.</td></tr>';
 
     var weeks = {};
-    var teams = ['Desenho Educacional','Soluções Educacionais','Design e Mídia Digital','Externo','Não mapeado'];
+    var teams = ['Desenho Educacional','Design Educacional','Mídia Digital','Soluções Educacionais','Externo','Não mapeado'];
     prod.produtividade_semanal.forEach(function(r){ if(!weeks[r.semana]) weeks[r.semana]={}; weeks[r.semana][r.equipe]=r.n; });
     var keys = Object.keys(weeks).sort().slice(-16);
     if(!keys.length){
@@ -1289,11 +1289,11 @@
 
   // ================= Funções (Design Gráfico, DI, Qualidade, Vídeo, Revisão, Webdesign) =================
   var FUNCAO_MAP = {
-    'Qualidade 01':'Qualidade', 'Qualidade 02':'Qualidade', 'Tester DI':'Qualidade', 'Tester Conteúdo':'Qualidade',
+    'Qualidade 01':'Qualidade', 'Qualidade 02':'Qualidade',
     'DI':'DI',
     'DG':'Design Gráfico',
-    'Revisão':'Revisão', 'Roteiro Revisão':'Revisão',
-    'Liberação Conteudista':'Vídeo', 'Gravação':'Vídeo', 'Edição':'Vídeo',
+    'Revisão':'Revisão',
+    'Roteiro':'Vídeo', 'Liberação Conteudista':'Vídeo', 'Gravação':'Vídeo', 'Edição':'Vídeo',
     'Web':'Webdesign'
   };
   var FUNCAO_ORDER = ['Design Gráfico','DI','Qualidade','Vídeo','Revisão','Webdesign'];
