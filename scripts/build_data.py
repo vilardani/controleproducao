@@ -91,27 +91,28 @@ def trello_get_paginated_actions(board_id, filter_types, limit=1000):
     return out
 
 
-def trello_get_paginated_cards(board_id, limit=1000, **params):
-    """Pagina /boards/{id}/cards/all usando o cursor `before` (id do card).
+def trello_get_all_cards(board_id, lists, **params):
+    """Busca todos os cards do board, lista por lista.
 
-    O limite máximo por chamada da API do Trello é 1000 — sem paginação,
-    boards com mais de 1000 cards (ativos + arquivados) ficariam truncados
-    silenciosamente.
+    /boards/{id}/cards/all não pagina de forma confiável com `before`/`since`
+    (testado: gera cards duplicados em vez de avançar o cursor). Como o limite
+    da API por chamada é 1000, buscamos por lista (/lists/{id}/cards, bem
+    menos provável de passar de 1000 cards numa única lista) e avisamos no
+    log caso alguma lista bata exatamente no teto, para revisão manual.
     """
     out = []
-    before = None
-    while True:
+    for lst in lists:
         qs = dict(params)
-        qs["limit"] = limit
-        if before:
-            qs["before"] = before
-        batch = trello_get(f"/boards/{board_id}/cards/all", **qs)
-        if not batch:
-            break
+        qs.setdefault("filter", "all")
+        qs["limit"] = 1000
+        batch = trello_get(f"/lists/{lst['id']}/cards", **qs)
+        if len(batch) >= 1000:
+            print(
+                f"  aviso: lista '{lst['name']}' retornou {len(batch)} cards "
+                "(pode estar truncada no limite da API; revisar manualmente).",
+                file=sys.stderr,
+            )
         out.extend(batch)
-        if len(batch) < limit:
-            break
-        before = batch[-1]["id"]
     return out
 
 
@@ -269,8 +270,8 @@ def main():
     member_name_by_id = {m["id"]: m.get("fullName") or m.get("username") for m in members}
 
     print("Buscando cards (ativos + arquivados)...", file=sys.stderr)
-    cards_raw = trello_get_paginated_cards(
-        BOARD_ID,
+    cards_raw = trello_get_all_cards(
+        BOARD_ID, lists,
         fields="name,idList,due,dateLastActivity,shortUrl,closed,idMembers,labels",
     )
     print(f"  {len(cards_raw)} cards.", file=sys.stderr)
