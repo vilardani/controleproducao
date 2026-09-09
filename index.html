@@ -196,6 +196,7 @@
       <button class="tab" data-tab="ritmo">Ritmo &amp; Backlog</button>
       <button class="tab" data-tab="produtividade">Produtividade</button>
       <button class="tab" data-tab="funcoes">Funções</button>
+      <button class="tab" data-tab="equipe">Visão por Equipe</button>
       <button class="tab" data-tab="extras">Cards Extras</button>
       <button class="tab" data-tab="consulta">Consultar Cards</button>
     </nav>
@@ -437,6 +438,76 @@
       </div>
       <div class="grid-auto" id="funcoes-composicao"></div>
     </section>
+  </div>
+
+  <!-- ===================== VISÃO POR EQUIPE ===================== -->
+  <div class="panel" id="panel-equipe">
+    <section>
+      <div class="section-head">
+        <h2>Visão por Equipe</h2>
+        <div class="section-sub">Funil, ritmo, produtividade e exportação detalhada por área — para cada liderança acompanhar só a própria etapa. Respeita os filtros globais de disciplina/unidade/produto no topo da página.</div>
+      </div>
+      <div class="toolbar">
+        <select id="gf-visao-equipe">
+          <option value="">Selecione uma equipe…</option>
+          <option value="Desenho Educacional">Desenho Educacional</option>
+          <option value="Design Educacional">Design Educacional</option>
+          <option value="Mídia Digital">Mídia Digital</option>
+          <option value="Soluções Educacionais">Soluções Educacionais</option>
+        </select>
+        <span class="spacer"></span>
+        <button class="btn" id="export-equipe-detalhado" disabled>Exportar detalhado (CSV)</button>
+      </div>
+    </section>
+
+    <div id="equipe-vazio" class="card pad"><div class="foot-note">Selecione uma equipe acima para ver o painel.</div></div>
+
+    <div id="equipe-conteudo" style="display:none">
+      <section>
+        <div class="kpi-grid" id="kpi-equipe"></div>
+      </section>
+
+      <section>
+        <div class="grid-2">
+          <div>
+            <div class="section-head"><h2>Atuando agora</h2><div class="section-sub">Cards ativos, parados numa etapa da equipe.</div></div>
+            <div class="table-wrap"><table id="tbl-equipe-atuando"><thead><tr>
+              <th>Card</th><th>Disciplina</th><th>Etapa</th><th class="num">Dias parado</th><th></th>
+            </tr></thead><tbody></tbody></table></div>
+          </div>
+          <div>
+            <div class="section-head"><h2>Aptos a avançar</h2><div class="section-sub">Etapa da equipe já concluída, card ainda não movido de lista no Trello.</div></div>
+            <div class="table-wrap"><table id="tbl-equipe-aptos"><thead><tr>
+              <th>Card</th><th>Disciplina</th><th>Etapa concluída</th><th class="num">Concluído há</th><th></th>
+            </tr></thead><tbody></tbody></table></div>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <div class="section-head"><h2>Ritmo &amp; Backlog da equipe</h2><div class="section-sub">Tempo (mediana/p90, em dias) que os cards levam dentro de cada etapa da equipe.</div></div>
+        <div class="table-wrap"><table id="tbl-equipe-ritmo"><thead><tr>
+          <th>Etapa</th><th class="num">Cards agora</th><th class="num">Mediana na etapa</th><th class="num">p90</th>
+        </tr></thead><tbody></tbody></table></div>
+      </section>
+
+      <section>
+        <div class="grid-2">
+          <div>
+            <div class="section-head"><h2>Produtividade — por pessoa</h2></div>
+            <div class="table-wrap"><table id="tbl-equipe-pessoas"><thead><tr>
+              <th>Pessoa</th><th>Etapa principal</th><th class="num">Total</th><th class="num">28d</th>
+            </tr></thead><tbody></tbody></table></div>
+          </div>
+          <div>
+            <div class="section-head"><h2>Funções — por etapa</h2></div>
+            <div class="table-wrap"><table id="tbl-equipe-funcoes"><thead><tr>
+              <th>Etapa</th><th class="num">Concluídas</th><th class="num">28d</th>
+            </tr></thead><tbody></tbody></table></div>
+          </div>
+        </div>
+      </section>
+    </div>
   </div>
 
   <!-- ===================== CARDS EXTRAS ===================== -->
@@ -1472,6 +1543,153 @@
     ]);
   });
 
+  // ================= Visão por Equipe =================
+  // Etapas (e pipelines onde elas existem) que cada equipe é dona — espelha
+  // STAGE_TO_EQUIPE do build_data.py.
+  var TEAM_STAGES = {
+    'Desenho Educacional':   {pipelines:['conteudo'],          stages:['Qualidade 01','Qualidade 02','DI','Revisão']},
+    'Design Educacional':    {pipelines:['conteudo'],          stages:['DG']},
+    'Mídia Digital':         {pipelines:['video'],             stages:['Roteiro','Liberação Conteudista','Gravação','Edição']},
+    'Soluções Educacionais': {pipelines:['conteudo','video'],  stages:['Web']},
+  };
+  var EQUIPE_STAGE_SUFFIXES = [' | PRODUÇÃO'];
+  function stripStageSuffix(s){
+    for(var i=0;i<EQUIPE_STAGE_SUFFIXES.length;i++){
+      var suf = EQUIPE_STAGE_SUFFIXES[i];
+      if(s.slice(-suf.length)===suf) return s.slice(0, -suf.length);
+    }
+    return s;
+  }
+  function fmtDataHora(iso){
+    if(!iso) return '—';
+    return new Date(iso).toLocaleString('pt-BR', {day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+  }
+  var currentEquipeExport = [];
+  function renderEquipeView(){
+    var eq = document.getElementById('gf-visao-equipe').value;
+    var exportBtn = document.getElementById('export-equipe-detalhado');
+    if(!eq){
+      document.getElementById('equipe-vazio').style.display = '';
+      document.getElementById('equipe-conteudo').style.display = 'none';
+      exportBtn.disabled = true;
+      currentEquipeExport = [];
+      return;
+    }
+    document.getElementById('equipe-vazio').style.display = 'none';
+    document.getElementById('equipe-conteudo').style.display = '';
+    exportBtn.disabled = false;
+
+    var cfg = TEAM_STAGES[eq];
+    var stageByUpper = {};
+    cfg.stages.forEach(function(s){ stageByUpper[s.toUpperCase()] = s; });
+
+    var cards = scopedCards().filter(function(c){
+      return !c.template_teste && cfg.pipelines.indexOf(c.pipeline)>=0;
+    });
+
+    // "Atuando agora": card ativo, sentado numa lista que corresponde a uma etapa da equipe.
+    var atuando = [];
+    cards.forEach(function(c){
+      if(c.arquivado) return;
+      var stage = stageByUpper[stripStageSuffix(c.etapa_atual)];
+      if(stage) atuando.push({card:c, etapa:stage});
+    });
+    atuando.sort(function(a,b){ return (b.card.dias_parado||0)-(a.card.dias_parado||0); });
+
+    // "Aptos a avançar": a etapa (mesma lista atual) já tem "fim" registrado —
+    // ou seja, já foi dada como concluída, mas o card não foi arrastado ainda.
+    var aptos = [];
+    atuando.forEach(function(a){
+      var st = a.card.stages[a.etapa];
+      if(st && st.fim) aptos.push({card:a.card, etapa:a.etapa, fim:st.fim});
+    });
+    aptos.sort(function(x,y){ return new Date(x.fim)-new Date(y.fim); });
+
+    var tiles = [
+      {label:'Atuando agora', value:n(atuando.length), sub:'cards ativos nas etapas da equipe'},
+      {label:'Aptos a avançar', value:n(aptos.length), sub:'etapa concluída, card ainda não movido', accent:true},
+      {label:'Etapas cobertas', value:n(cfg.stages.length), sub:cfg.stages.join(', ')},
+    ];
+    document.getElementById('kpi-equipe').innerHTML = tiles.map(function(t){
+      return '<div class="kpi'+(t.accent?' accent':'')+'"><div class="label">'+esc(t.label)+'</div><div class="value">'+t.value+'</div><div class="sub">'+esc(t.sub)+'</div></div>';
+    }).join('');
+
+    document.querySelector('#tbl-equipe-atuando tbody').innerHTML = atuando.length ? atuando.map(function(a){
+      var c = a.card, sev = agingSeverity(c.dias_parado);
+      return '<tr><td><a class="row-link" target="_blank" rel="noopener" href="'+esc(c.url)+'"><span class="card-name" title="'+esc(c.nome)+'">'+esc(c.nome)+'</span></a></td>'+
+        '<td>'+esc(c.disciplina||'—')+'</td><td>'+esc(a.etapa)+'</td>'+
+        '<td class="num"><span class="pill '+sev.c+'">'+d1(c.dias_parado)+'d</span></td>'+
+        '<td><a class="row-link" target="_blank" rel="noopener" href="'+esc(c.url)+'">Trello ↗</a></td></tr>';
+    }).join('') : '<tr><td colspan="5" class="foot-note">Nenhum card ativo nesta seleção.</td></tr>';
+
+    document.querySelector('#tbl-equipe-aptos tbody').innerHTML = aptos.length ? aptos.map(function(a){
+      var c = a.card, dias = round1(daysBetween(a.fim, SNAPSHOT_DATE));
+      return '<tr><td><a class="row-link" target="_blank" rel="noopener" href="'+esc(c.url)+'"><span class="card-name" title="'+esc(c.nome)+'">'+esc(c.nome)+'</span></a></td>'+
+        '<td>'+esc(c.disciplina||'—')+'</td><td>'+esc(a.etapa)+'</td>'+
+        '<td class="num">'+d1(dias)+'d</td>'+
+        '<td><a class="row-link" target="_blank" rel="noopener" href="'+esc(c.url)+'">Trello ↗</a></td></tr>';
+    }).join('') : '<tr><td colspan="5" class="foot-note">Nenhum card apto nesta seleção.</td></tr>';
+
+    // Ritmo & Backlog: tempo (ini→fim) dentro de cada etapa da equipe.
+    var ritmoRows = cfg.stages.map(function(stage){
+      var agora = atuando.filter(function(a){ return a.etapa===stage; }).length;
+      var diffs = [];
+      cards.forEach(function(c){
+        var st = c.stages[stage];
+        if(st && st.ini && st.fim){ var d = daysBetween(st.ini, st.fim); diffs.push(d<0?0:d); }
+      });
+      var st = statsOf(diffs);
+      return '<tr><td>'+esc(stage)+'</td><td class="num">'+n(agora)+'</td>'+
+        '<td class="num">'+(st?d1(st.mediana)+'d':'—')+'</td><td class="num">'+(st?d1(st.p90)+'d':'—')+'</td></tr>';
+    }).join('');
+    document.querySelector('#tbl-equipe-ritmo tbody').innerHTML = ritmoRows;
+
+    // Produtividade — por pessoa (reaproveita buildProdutividade, filtra pela equipe).
+    var prod = buildProdutividade(cards);
+    var pessoasEquipe = prod.pessoas.filter(function(p){ return p.equipe===eq; });
+    document.querySelector('#tbl-equipe-pessoas tbody').innerHTML = pessoasEquipe.length ? pessoasEquipe.map(function(p){
+      return '<tr><td>'+esc(p.pessoa)+'</td><td>'+esc(p.etapa_principal)+'</td>'+
+        '<td class="num"><b>'+n(p.total_concluidas)+'</b></td><td class="num">'+n(p.ultimos_28d)+'</td></tr>';
+    }).join('') : '<tr><td colspan="4" class="foot-note">Sem registros nesta seleção.</td></tr>';
+
+    // Funções — por etapa (só eventos atribuídos a essa equipe).
+    var cutoff28 = new Date(SNAPSHOT_DATE.getTime() - 28*86400000);
+    var porEtapa = {};
+    cfg.stages.forEach(function(s){ porEtapa[s] = {etapa:s, total:0, d28:0}; });
+    cards.forEach(function(c){
+      (c.resp_stages||[]).forEach(function(ev){
+        if(ev.equipe!==eq || !porEtapa[ev.etapa]) return;
+        porEtapa[ev.etapa].total++;
+        if(new Date(ev.data) >= cutoff28) porEtapa[ev.etapa].d28++;
+      });
+    });
+    document.querySelector('#tbl-equipe-funcoes tbody').innerHTML = cfg.stages.map(function(s){
+      var r = porEtapa[s];
+      return '<tr><td>'+esc(s)+'</td><td class="num">'+n(r.total)+'</td><td class="num">'+n(r.d28)+'</td></tr>';
+    }).join('');
+
+    // Export detalhado: uma linha por card+etapa da equipe, com início/fim.
+    currentEquipeExport = [];
+    cards.forEach(function(c){
+      cfg.stages.forEach(function(stage){
+        var st = c.stages[stage];
+        if(!st || (!st.ini && !st.fim)) return;
+        currentEquipeExport.push({
+          card:c.nome, codigo:c.codigo||'', disciplina:c.disciplina||'', etapa:stage,
+          inicio:fmtDataHora(st.ini), fim:fmtDataHora(st.fim), url:c.url
+        });
+      });
+    });
+  }
+  document.getElementById('gf-visao-equipe').addEventListener('change', renderEquipeView);
+  document.getElementById('export-equipe-detalhado').addEventListener('click', function(){
+    var eq = document.getElementById('gf-visao-equipe').value;
+    exportCSV('equipe-'+eq.toLowerCase().replace(/\s+/g,'-')+'-detalhado.csv', currentEquipeExport, [
+      {key:'card',label:'Card'},{key:'codigo',label:'Código'},{key:'disciplina',label:'Disciplina'},
+      {key:'etapa',label:'Etapa'},{key:'inicio',label:'Início'},{key:'fim',label:'Fim'},{key:'url',label:'URL'}
+    ]);
+  });
+
   // ================= Consultar Cards =================
   var CARDS = ALL_CARDS.filter(function(c){ return !c.template_teste; });
   (function(){
@@ -1558,6 +1776,7 @@
     renderProdutividade(cards);
     renderFuncoes(cards);
     renderExtras(cards);
+    renderEquipeView();
     applyFilters();
   }
   renderAll();
