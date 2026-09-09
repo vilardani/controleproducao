@@ -479,9 +479,12 @@ def main():
 
         # Arquivado sem nenhuma movimentação registrada (nenhum Custom Field nem
         # histórico de lista além da entrada) = card sem produção real, nunca
-        # chegou a começar. Trata como template_teste para sair de toda análise.
+        # chegou a começar. "Recebimento" e "Finalizado" não contam: são
+        # sintéticos (data de criação do card / card caiu numa lista de
+        # conclusão), não vêm de um campo complementar de fato preenchido.
+        # Trata como template_teste para sair de toda análise.
         if stage_key and arquivado and not any(
-            v.get("fim") for lbl, v in stages.items() if lbl != "Recebimento"
+            v.get("fim") for lbl, v in stages.items() if lbl not in ("Recebimento", "Finalizado")
         ):
             template_teste = True
 
