@@ -298,6 +298,35 @@ STAGE_CUSTOM_FIELD = {
 }
 
 
+def compute_moves_stages(moves, labels):
+    """Reconstrói ini/fim por etapa a partir do histórico de movimentação entre
+    listas (mesma lógica usada para Vídeo/BDQ). Usado em TEMA/OBJ apenas para
+    comparar com a data informada no Custom Field (aba "Confiabilidade dos
+    Dados"), não substitui stages[label]["ini"/"fim"] nesses pipelines."""
+    label_by_upper = {lbl.upper(): lbl for lbl in labels}
+
+    def canon_label(lista_raw):
+        return label_by_upper.get((lista_raw or "").strip().upper())
+
+    moves_canon = []
+    for mv in moves:
+        canon = canon_label(mv["lista"])
+        if canon:
+            moves_canon.append({**mv, "lista": canon})
+
+    entradas = {}
+    for mv in moves_canon:
+        if mv["lista"] not in entradas:
+            entradas[mv["lista"]] = mv["data"]
+
+    out = {}
+    for i, mv in enumerate(moves_canon):
+        out.setdefault(mv["lista"], {"ini": entradas.get(mv["lista"]), "fim": None})
+        if i + 1 < len(moves_canon):
+            out[mv["lista"]]["fim"] = moves_canon[i + 1]["data"]
+    return out
+
+
 def fetch_custom_field_defs(board_id):
     """Busca as definições de Custom Fields do board (id -> nome/tipo/opções)."""
     fields = trello_get(f"/boards/{board_id}/customFields")
@@ -441,6 +470,19 @@ def main():
             stages["Recebimento"] = {"ini": criado_em, "fim": criado_em}
             if "Finalizado" in labels and macro_fase == "Concluído" and c.get("dateLastActivity"):
                 stages["Finalizado"] = {"ini": c["dateLastActivity"], "fim": c["dateLastActivity"]}
+
+            # Guarda também a data "real" de movimentação por etapa (quando o card de
+            # fato saiu da lista), só para comparar com a data informada no Custom
+            # Field — ver aba "Confiabilidade dos Dados". Não altera ini/fim acima.
+            mov_stages = compute_moves_stages(moves, labels)
+            for lbl in labels:
+                mv = mov_stages.get(lbl)
+                if not mv:
+                    continue
+                if mv.get("ini"):
+                    stages[lbl]["ini_mov"] = mv["ini"]
+                if mv.get("fim"):
+                    stages[lbl]["fim_mov"] = mv["fim"]
         elif stage_key:
             # Vídeo/BDQ: mapeamento de Custom Field por etapa não é tão direto
             # (o board tem campos como "LIBERAÇÃO GRAVAÇÃO" sem correspondência

@@ -200,6 +200,7 @@
       <button class="tab" data-tab="bdq">Banco de Questões</button>
       <button class="tab" data-tab="extras">Cards Extras</button>
       <button class="tab" data-tab="consulta">Consultar Cards</button>
+      <button class="tab" data-tab="confiabilidade">Confiabilidade dos Dados</button>
     </nav>
     <div class="global-filter" id="global-filter">
       <span class="gf-label">Filtros</span>
@@ -677,6 +678,35 @@
         <span id="pg-info"></span>
         <button class="btn" id="pg-next">Próxima →</button>
       </div>
+    </section>
+  </div>
+
+  <!-- ===================== CONFIABILIDADE DOS DADOS ===================== -->
+  <div class="panel" id="panel-confiabilidade">
+    <section>
+      <div class="section-head">
+        <h2>Confiabilidade dos Dados</h2>
+        <div class="section-sub">Compara a data informada no campo personalizado de cada etapa (Qualidade 01/02, DI, Revisão, DG, Web) com a data real em que o card foi movido de lista no Trello. Só existe para essas etapas — Vídeo e Banco de Questões já usam a movimentação como única fonte, não há o que comparar. Desvio positivo = campo preenchido depois do card já ter sido movido (registro atrasado); negativo = campo preenchido antes do card ser movido (registro adiantado).</div>
+      </div>
+      <div class="kpi-grid" id="kpi-confiabilidade"></div>
+    </section>
+
+    <section>
+      <div class="section-head"><h2>Por pessoa</h2></div>
+      <div class="table-wrap"><table id="tbl-confiabilidade-pessoas"><thead><tr>
+        <th>Pessoa</th><th>Equipe</th><th class="num">Comparações</th><th class="num">Desvio médio</th><th class="num">Desvio abs. mediano</th><th class="num">Maior desvio</th><th class="num">% &gt; 1 dia</th>
+      </tr></thead><tbody></tbody></table></div>
+      <div class="foot-note">Desvio médio é assinado (mostra tendência de atraso ou adiantamento); desvio absoluto mediano e maior desvio medem o tamanho da divergência independente da direção.</div>
+    </section>
+
+    <section>
+      <div class="section-head">
+        <h2>Maiores divergências</h2>
+        <button class="btn" id="export-confiabilidade">Exportar CSV</button>
+      </div>
+      <div class="table-wrap"><table id="tbl-confiabilidade-top"><thead><tr>
+        <th>Card</th><th>Etapa</th><th>Pessoa</th><th>Informado</th><th>Realizado (movimentação)</th><th class="num">Desvio</th><th></th>
+      </tr></thead><tbody></tbody></table></div>
     </section>
   </div>
 
@@ -1752,6 +1782,87 @@
     ]);
   });
 
+  // ================= Confiabilidade dos Dados (informado vs. realizado) =================
+  // Etapas com Custom Field de data (as únicas onde dá pra comparar informado x movimentação real).
+  var CONFIABILIDADE_STAGES = ['Qualidade 01', 'Qualidade 02', 'DI', 'Revisão', 'DG', 'Web'];
+  var currentConfiabilidadeTop = [];
+  function fmtDataCurta(iso){
+    if(!iso) return '—';
+    return new Date(iso).toLocaleString('pt-BR', {day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'});
+  }
+  function buildConfiabilidade(cards){
+    var byPessoa = {}, casos = [];
+    cards.forEach(function(c){
+      if(c.template_teste || c.pipeline!=='conteudo') return;
+      CONFIABILIDADE_STAGES.forEach(function(stage){
+        var st = c.stages && c.stages[stage];
+        if(!st || !st.fim || !st.fim_mov) return;
+        var ev = (c.resp_stages||[]).filter(function(r){ return r.etapa===stage; })[0];
+        if(!ev) return;
+        var delta = round1(daysBetween(st.fim_mov, st.fim));
+        var caso = {card:c.nome, url:c.url, etapa:stage, pessoa:ev.pessoa, equipe:ev.equipe,
+          informado:st.fim, realizado:st.fim_mov, delta:delta};
+        casos.push(caso);
+        var key = ev.pessoa+'|'+ev.equipe;
+        if(!byPessoa[key]) byPessoa[key] = {pessoa:ev.pessoa, equipe:ev.equipe, n:0, deltas:[]};
+        byPessoa[key].n++;
+        byPessoa[key].deltas.push(delta);
+      });
+    });
+    var pessoas = Object.keys(byPessoa).map(function(k){
+      var p = byPessoa[k];
+      var sorted = p.deltas.slice().sort(function(a,b){return a-b;});
+      var absSorted = p.deltas.map(Math.abs).sort(function(a,b){return a-b;});
+      var media = round1(p.deltas.reduce(function(a,b){return a+b;},0)/p.deltas.length);
+      var medianaAbs = round1(median(absSorted));
+      var maior = round1(Math.max.apply(null, absSorted));
+      var divergentes = p.deltas.filter(function(d){ return Math.abs(d)>1; }).length;
+      return {pessoa:p.pessoa, equipe:p.equipe, n:p.n, media:media, medianaAbs:medianaAbs, maior:maior,
+        pctDivergente: round1(100*divergentes/p.n)};
+    }).sort(function(a,b){ return b.medianaAbs-a.medianaAbs; });
+    casos.sort(function(a,b){ return Math.abs(b.delta)-Math.abs(a.delta); });
+    return {pessoas:pessoas, casos:casos};
+  }
+  function renderConfiabilidade(cards){
+    var conf = buildConfiabilidade(cards);
+    var totalComparacoes = conf.casos.length;
+    var maisDivergente = conf.pessoas.slice().sort(function(a,b){return b.medianaAbs-a.medianaAbs;})[0];
+    var piorCaso = conf.casos[0];
+    var tiles = [
+      {label:'Comparações possíveis', value:n(totalComparacoes), sub:'cards com data no campo e na movimentação'},
+      {label:'Pessoas comparadas', value:n(conf.pessoas.length), sub:'com pelo menos 1 comparação'},
+      {label:'Maior divergência mediana', value:maisDivergente?d1(maisDivergente.medianaAbs)+'d':'—', sub:maisDivergente?maisDivergente.pessoa:'', accent:true},
+      {label:'Pior caso individual', value:piorCaso?d1(Math.abs(piorCaso.delta))+'d':'—', sub:piorCaso?(piorCaso.pessoa+' · '+piorCaso.etapa):''},
+    ];
+    document.getElementById('kpi-confiabilidade').innerHTML = tiles.map(function(t){
+      return '<div class="kpi'+(t.accent?' accent':'')+'"><div class="label">'+esc(t.label)+'</div><div class="value">'+esc(t.value)+'</div><div class="sub">'+esc(t.sub)+'</div></div>';
+    }).join('');
+
+    document.querySelector('#tbl-confiabilidade-pessoas tbody').innerHTML = conf.pessoas.length ? conf.pessoas.map(function(p){
+      var sev = p.medianaAbs>2 ? 'p-critical' : (p.medianaAbs>1 ? 'p-warning' : 'p-good');
+      return '<tr><td>'+esc(p.pessoa)+'</td><td>'+esc(p.equipe)+'</td><td class="num">'+n(p.n)+'</td>'+
+        '<td class="num">'+(p.media>0?'+':'')+d1(p.media)+'d</td>'+
+        '<td class="num"><span class="pill '+sev+'">'+d1(p.medianaAbs)+'d</span></td>'+
+        '<td class="num">'+d1(p.maior)+'d</td><td class="num">'+d1(p.pctDivergente)+'%</td></tr>';
+    }).join('') : '<tr><td colspan="7" class="foot-note">Sem comparações possíveis nesta seleção.</td></tr>';
+
+    currentConfiabilidadeTop = conf.casos.slice(0, 50);
+    document.querySelector('#tbl-confiabilidade-top tbody').innerHTML = currentConfiabilidadeTop.length ? currentConfiabilidadeTop.map(function(c){
+      var sev = Math.abs(c.delta)>2 ? 'p-critical' : (Math.abs(c.delta)>1 ? 'p-warning' : 'p-good');
+      return '<tr><td><a class="row-link" target="_blank" rel="noopener" href="'+esc(c.url)+'"><span class="card-name" title="'+esc(c.card)+'">'+esc(c.card)+'</span></a></td>'+
+        '<td>'+esc(c.etapa)+'</td><td>'+esc(c.pessoa)+'</td>'+
+        '<td>'+fmtDataCurta(c.informado)+'</td><td>'+fmtDataCurta(c.realizado)+'</td>'+
+        '<td class="num"><span class="pill '+sev+'">'+(c.delta>0?'+':'')+d1(c.delta)+'d</span></td>'+
+        '<td><a class="row-link" target="_blank" rel="noopener" href="'+esc(c.url)+'">Trello ↗</a></td></tr>';
+    }).join('') : '<tr><td colspan="7" class="foot-note">Sem comparações possíveis nesta seleção.</td></tr>';
+  }
+  document.getElementById('export-confiabilidade').addEventListener('click', function(){
+    exportCSV('confiabilidade-divergencias.csv', currentConfiabilidadeTop, [
+      {key:'card',label:'Card'},{key:'etapa',label:'Etapa'},{key:'pessoa',label:'Pessoa'},
+      {key:'informado',label:'Informado'},{key:'realizado',label:'Realizado'},{key:'delta',label:'Desvio (dias)'},{key:'url',label:'URL'}
+    ]);
+  });
+
   // ================= orquestração global =================
   function renderAll(){
     var cards = scopedCards();
@@ -1764,6 +1875,7 @@
     renderTeamMidia(cards);
     renderTeamSolucoes(cards);
     renderExtras(cards);
+    renderConfiabilidade(cards);
     applyFilters();
   }
   renderAll();
