@@ -760,11 +760,29 @@
     VIDEO: ['Recebimento','Roteiro','Liberação Conteudista','Gravação','Edição','Web','Finalizado'],
     BDQ:   ['Recebimento','Web (publicado)']
   };
-  // Corta uma lista de etapas logo após `lastLabel` — usada para que o funil/fila/conclusão
-  // de cada painel de equipe pare exatamente na última etapa que aquela equipe é dona.
+  // Corta uma lista de etapas logo após `lastLabel` — usada só para saber quais etapas
+  // pertencem a uma equipe (ex.: filtrar pares de fila). NUNCA usar como entrada de
+  // buildFunnel/buildFunnelByUnit — isso cortaria fora "Finalizado", que é o que permite
+  // ao forward-fill (buildFunnelFlow) enxergar que um card arquivado direto já passou
+  // pela última etapa da equipe mesmo sem essa etapa ter "fim" registrado.
   function truncateStages(list, lastLabel){
     var idx = list.indexOf(lastLabel);
     return idx>=0 ? list.slice(0, idx+1) : list.slice();
+  }
+  // Corta um array de `etapas` já calculado (saída de buildFunnel/buildFunnelByUnit) logo
+  // após a etapa `lastLabel` — usar isso para exibição, sempre calculando antes com a
+  // lista COMPLETA de etapas do pipeline (para o forward-fill funcionar corretamente).
+  function sliceEtapas(etapas, lastLabel){
+    for(var i=0;i<etapas.length;i++){
+      if(etapas[i].etapa===lastLabel) return etapas.slice(0, i+1);
+    }
+    return etapas.slice();
+  }
+  // Mantém só os pares de fila (buildQueueChain) onde as duas pontas pertencem ao
+  // conjunto de etapas informado — usado para restringir "onde ficam parados" às
+  // etapas de uma equipe sem afetar o cálculo do funil (que precisa da lista completa).
+  function filterQueueTo(queue, stageSet){
+    return queue.filter(function(f){ return stageSet.indexOf(f.de)>=0 && stageSet.indexOf(f.para)>=0; });
   }
 
   // ---------------- math helpers ----------------
@@ -1243,48 +1261,58 @@
 
   // Plano de Ensino é um card único por disciplina (unidade "PE", não U1-U4) — não tem o que
   // colorir por unidade, então mantém funil de cor única; INF/QUIZ/POD são por unidade 1-4.
-  function renderObjetosPorTipo(containerId, legendId, content, objStages){
+  // objStages deve ser a lista COMPLETA do pipeline (STAGE_DEFS.OBJ) — o forward-fill
+  // precisa dela inteira para enxergar cards arquivados direto; uptoLabel corta a
+  // exibição (funil calculado, depois cortado) na última etapa que a equipe é dona.
+  function renderObjetosPorTipo(containerId, legendId, content, objStages, uptoLabel){
     var codesPorUnidade = ['INF','QUIZ','POD'];
     var objLabel = {INF:'Infográfico', QUIZ:'Quiz', POD:'Podcast', PE:'Plano de Ensino'};
     var htmlPorUnidade = codesPorUnidade.map(function(code){
       var sub = content.filter(function(c){ return c.tipo===code; });
-      var f = buildFunnelByUnit(sub, objStages, true);
-      if(!f.total) return '<div class="card pad mini-funnel"><h3>'+objLabel[code]+' <span class="foot-note" style="display:inline">(0)</span></h3><div class="foot-note" style="margin-top:8px">Nenhum card nesta seleção.</div></div>';
-      var max = f.etapas[0].n || 1;
-      var rows = f.etapas.map(function(e){
+      var fFull = buildFunnelByUnit(sub, objStages, true);
+      var etapas = sliceEtapas(fFull.etapas, uptoLabel);
+      if(!fFull.total) return '<div class="card pad mini-funnel"><h3>'+objLabel[code]+' <span class="foot-note" style="display:inline">(0)</span></h3><div class="foot-note" style="margin-top:8px">Nenhum card nesta seleção.</div></div>';
+      var max = etapas[0].n || 1;
+      var rows = etapas.map(function(e){
         var segsHtml = e.segs.map(function(s){ return unitSegHtml(s, max, e.n); }).join('');
         return '<div class="funnel-row"><div class="funnel-label">'+esc(e.etapa)+'</div>'+
           '<div class="funnel-track" style="display:flex">'+segsHtml+'</div>'+
           '<div class="funnel-num"><b>'+n(e.n)+'</b> · '+pct(e.pct)+'</div></div>';
       }).join('');
-      return '<div class="card pad mini-funnel"><h3>'+objLabel[code]+' <span class="foot-note" style="display:inline">('+n(f.total)+')</span></h3><div class="funnel" style="margin-top:8px">'+rows+'</div></div>';
+      return '<div class="card pad mini-funnel"><h3>'+objLabel[code]+' <span class="foot-note" style="display:inline">('+n(fFull.total)+')</span></h3><div class="funnel" style="margin-top:8px">'+rows+'</div></div>';
     }).join('');
     // Plano de Ensino é identificado pela unidade (PE, sem número), não pelo tipo —
     // o tipo real desses cards varia (ex.: INT), só a unidade é sempre "PE".
     var peCards = content.filter(function(c){ return c.unidade_num===null; });
-    var fPe = buildFunnelFlow(peCards, objStages);
+    var fPeFull = buildFunnelFlow(peCards, objStages);
+    var etapasPe = sliceEtapas(fPeFull.etapas, uptoLabel);
     var htmlPe;
-    if(!fPe.total){
+    if(!fPeFull.total){
       htmlPe = '<div class="card pad mini-funnel"><h3>Plano de Ensino <span class="foot-note" style="display:inline">(0)</span></h3><div class="foot-note" style="margin-top:8px">Nenhum card nesta seleção.</div></div>';
     } else {
-      var maxPe = fPe.etapas[0].n || 1;
-      var rowsPe = fPe.etapas.map(function(e){
+      var maxPe = etapasPe[0].n || 1;
+      var rowsPe = etapasPe.map(function(e){
         return '<div class="funnel-row"><div class="funnel-label">'+esc(e.etapa)+'</div>'+
           '<div class="funnel-track"><div class="funnel-fill" style="width:'+(100*e.n/maxPe)+'%;background:'+CAT.tipo.PE+'"></div></div>'+
           '<div class="funnel-num"><b>'+n(e.n)+'</b> · '+pct(e.pct)+'</div></div>';
       }).join('');
-      htmlPe = '<div class="card pad mini-funnel"><h3>Plano de Ensino <span class="foot-note" style="display:inline">('+n(fPe.total)+')</span> <span class="foot-note" style="display:inline">— um card por disciplina, sem unidade</span></h3><div class="funnel" style="margin-top:8px">'+rowsPe+'</div></div>';
+      htmlPe = '<div class="card pad mini-funnel"><h3>Plano de Ensino <span class="foot-note" style="display:inline">('+n(fPeFull.total)+')</span> <span class="foot-note" style="display:inline">— um card por disciplina, sem unidade</span></h3><div class="funnel" style="margin-top:8px">'+rowsPe+'</div></div>';
     }
     document.getElementById(containerId).innerHTML = htmlPorUnidade + htmlPe;
     document.getElementById(legendId).innerHTML = UNIT_LEGEND;
   }
 
-  function renderUnitBreakdown(containerId, cardsForUnit, stages, color, footnote){
-    var rows = unitBreakdown(cardsForUnit, stages).map(function(u){
-      var last = u.etapas[u.etapas.length-1];
-      return '<div class="hbar-row"><div class="hbar-label">'+u.unidade+'</div>'+
-        '<div class="hbar-track"><div class="hbar-fill" style="background:'+(color||UNIT_COLOR[u.unidade_num])+';width:'+last.pct+'%"></div></div>'+
-        '<div class="hbar-nums"><b>'+n(last.n)+'</b>/'+n(u.total)+' · '+pct(last.pct)+'</div></div>';
+  // fullStages = lista COMPLETA do pipeline (pro forward-fill enxergar cards arquivados
+  // direto); uptoLabel corta a linha exibida (última etapa que a equipe é dona).
+  function renderUnitBreakdown(containerId, cardsForUnit, fullStages, uptoLabel, footnote){
+    var rows = ['1','2','3','4'].map(function(u){
+      var sub = cardsForUnit.filter(function(c){ return c.unidade_num===u; });
+      var fFull = buildFunnelFlow(sub, fullStages);
+      var etapas = sliceEtapas(fFull.etapas, uptoLabel);
+      var last = etapas[etapas.length-1];
+      return '<div class="hbar-row"><div class="hbar-label">Unidade '+u+'</div>'+
+        '<div class="hbar-track"><div class="hbar-fill" style="background:'+UNIT_COLOR[u]+';width:'+last.pct+'%"></div></div>'+
+        '<div class="hbar-nums"><b>'+n(last.n)+'</b>/'+n(fFull.total)+' · '+pct(last.pct)+'</div></div>';
     }).join('');
     document.getElementById(containerId).innerHTML = rows + '<div class="foot-note">'+footnote+'</div>';
   }
@@ -1294,13 +1322,13 @@
     var content = cardsAll.filter(function(c){ return c.pipeline==='conteudo' && !c.template_teste; });
     var temaCards = content.filter(function(c){ return isTemaTipo(c.tipo); });
     var TEMA_STAGES = truncateStages(STAGE_DEFS.TEMA, 'Revisão');
-    var OBJ_STAGES = truncateStages(STAGE_DEFS.OBJ, 'Revisão');
 
-    renderFunnelByUnit(document.getElementById('funil-desenho-tema'), buildFunnelByUnit(temaCards, TEMA_STAGES, true).etapas);
+    var temaEtapas = sliceEtapas(buildFunnelByUnit(temaCards, STAGE_DEFS.TEMA, true).etapas, 'Revisão');
+    renderFunnelByUnit(document.getElementById('funil-desenho-tema'), temaEtapas);
     document.getElementById('funil-desenho-tema-legend').innerHTML = UNIT_LEGEND;
-    renderObjetosPorTipo('funil-desenho-obj', 'funil-desenho-obj-legend', content, OBJ_STAGES);
-    renderQueue(document.getElementById('filas-desenho'), buildQueueChain(temaCards, TEMA_STAGES));
-    renderUnitBreakdown('unidade-desenho', temaCards, TEMA_STAGES, null, '% de Temas com Revisão concluída, por unidade.');
+    renderObjetosPorTipo('funil-desenho-obj', 'funil-desenho-obj-legend', content, STAGE_DEFS.OBJ, 'Revisão');
+    renderQueue(document.getElementById('filas-desenho'), filterQueueTo(buildQueueChain(temaCards, STAGE_DEFS.TEMA), TEMA_STAGES));
+    renderUnitBreakdown('unidade-desenho', temaCards, STAGE_DEFS.TEMA, 'Revisão', '% de Temas com Revisão concluída, por unidade.');
 
     var ops = renderTeamOps('desenho', 'Desenho Educacional', ['Qualidade 01','Qualidade 02','DI','Revisão'], content);
     document.getElementById('kpi-desenho').innerHTML = teamKpiTiles(ops.atuando, ops.aptos, ['Qualidade 01','Qualidade 02','DI','Revisão']);
@@ -1311,13 +1339,13 @@
     var content = cardsAll.filter(function(c){ return c.pipeline==='conteudo' && !c.template_teste; });
     var temaCards = content.filter(function(c){ return isTemaTipo(c.tipo); });
     var TEMA_STAGES = truncateStages(STAGE_DEFS.TEMA, 'DG');
-    var OBJ_STAGES = truncateStages(STAGE_DEFS.OBJ, 'DG');
 
-    renderFunnelByUnit(document.getElementById('funil-design-tema'), buildFunnelByUnit(temaCards, TEMA_STAGES, true).etapas);
+    var temaEtapas = sliceEtapas(buildFunnelByUnit(temaCards, STAGE_DEFS.TEMA, true).etapas, 'DG');
+    renderFunnelByUnit(document.getElementById('funil-design-tema'), temaEtapas);
     document.getElementById('funil-design-tema-legend').innerHTML = UNIT_LEGEND;
-    renderObjetosPorTipo('funil-design-obj', 'funil-design-obj-legend', content, OBJ_STAGES);
-    renderQueue(document.getElementById('filas-design'), buildQueueChain(temaCards, TEMA_STAGES));
-    renderUnitBreakdown('unidade-design', temaCards, TEMA_STAGES, null, '% de Temas com DG concluído, por unidade.');
+    renderObjetosPorTipo('funil-design-obj', 'funil-design-obj-legend', content, STAGE_DEFS.OBJ, 'DG');
+    renderQueue(document.getElementById('filas-design'), filterQueueTo(buildQueueChain(temaCards, STAGE_DEFS.TEMA), TEMA_STAGES));
+    renderUnitBreakdown('unidade-design', temaCards, STAGE_DEFS.TEMA, 'DG', '% de Temas com DG concluído, por unidade.');
 
     var ops = renderTeamOps('design', 'Design Educacional', ['DG'], content);
     document.getElementById('kpi-design').innerHTML = teamKpiTiles(ops.atuando, ops.aptos, ['DG']);
@@ -1378,21 +1406,23 @@
   });
 
   // ================= Mídia Digital (Roteiro, Liberação Conteudista, Gravação, Edição) =================
-  function renderFunilVideoPorFormato(containerId, legendId, noteId, video, videoStages){
+  // videoStages = lista COMPLETA (STAGE_DEFS.VIDEO); uptoLabel corta a exibição.
+  function renderFunilVideoPorFormato(containerId, legendId, noteId, video, videoStages, uptoLabel){
     var codes = ['CONC','PEV','EDUV'];
     var vidLabel = {CONC:'Conceituando', PEV:'Prática em Evidência', EDUV:'EADúvida'};
     var html = codes.map(function(code){
       var sub = video.filter(function(c){ return c.tipo===code; });
-      var f = buildFunnelByUnit(sub, videoStages, true);
-      if(!f.total) return '<div class="card pad mini-funnel"><h3>'+vidLabel[code]+' <span class="foot-note" style="display:inline">(0)</span></h3><div class="foot-note" style="margin-top:8px">Nenhum card nesta seleção.</div></div>';
-      var max = f.etapas[0].n || 1;
-      var rows = f.etapas.map(function(e){
+      var fFull = buildFunnelByUnit(sub, videoStages, true);
+      var etapas = sliceEtapas(fFull.etapas, uptoLabel);
+      if(!fFull.total) return '<div class="card pad mini-funnel"><h3>'+vidLabel[code]+' <span class="foot-note" style="display:inline">(0)</span></h3><div class="foot-note" style="margin-top:8px">Nenhum card nesta seleção.</div></div>';
+      var max = etapas[0].n || 1;
+      var rows = etapas.map(function(e){
         var segsHtml = e.segs.map(function(s){ return unitSegHtml(s, max, e.n); }).join('');
         return '<div class="funnel-row"><div class="funnel-label">'+esc(e.etapa)+'</div>'+
           '<div class="funnel-track" style="display:flex">'+segsHtml+'</div>'+
           '<div class="funnel-num"><b>'+n(e.n)+'</b> · '+pct(e.pct)+'</div></div>';
       }).join('');
-      return '<div class="card pad mini-funnel"><h3>'+vidLabel[code]+' <span class="foot-note" style="display:inline">('+n(f.total)+')</span></h3><div class="funnel" style="margin-top:8px">'+rows+'</div></div>';
+      return '<div class="card pad mini-funnel"><h3>'+vidLabel[code]+' <span class="foot-note" style="display:inline">('+n(fFull.total)+')</span></h3><div class="funnel" style="margin-top:8px">'+rows+'</div></div>';
     }).join('');
     document.getElementById(containerId).innerHTML = html;
     document.getElementById(legendId).innerHTML = UNIT_LEGEND;
@@ -1403,11 +1433,11 @@
     var video = cardsAll.filter(function(c){ return c.pipeline==='video' && !c.template_teste; });
     var VIDEO_STAGES = truncateStages(STAGE_DEFS.VIDEO, 'Edição');
 
-    renderFunilVideoPorFormato('funil-midia', 'funil-midia-legend', 'funil-midia-note', video, VIDEO_STAGES);
+    renderFunilVideoPorFormato('funil-midia', 'funil-midia-legend', 'funil-midia-note', video, STAGE_DEFS.VIDEO, 'Edição');
 
-    var queue = buildQueueChain(video, VIDEO_STAGES);
+    var queue = filterQueueTo(buildQueueChain(video, STAGE_DEFS.VIDEO), VIDEO_STAGES);
     renderQueue(document.getElementById('filas-midia'), queue);
-    renderUnitBreakdown('unidade-midia', video, VIDEO_STAGES, null, '% de vídeos com Edição concluída, por unidade.');
+    renderUnitBreakdown('unidade-midia', video, STAGE_DEFS.VIDEO, 'Edição', '% de vídeos com Edição concluída, por unidade.');
 
     var dep = dependenciaExterna(cardsAll);
     var totalClassificado = dep.INTERNO+dep.EXTERNO;
@@ -1676,30 +1706,35 @@
     var video = cardsAll.filter(function(c){ return c.pipeline==='video' && !c.template_teste; });
     var temaCards = content.filter(function(c){ return isTemaTipo(c.tipo); });
     var TEMA_STAGES = truncateStages(STAGE_DEFS.TEMA, 'Web');
-    var OBJ_STAGES = truncateStages(STAGE_DEFS.OBJ, 'Web');
     var VIDEO_STAGES = truncateStages(STAGE_DEFS.VIDEO, 'Web');
 
-    renderFunnelByUnit(document.getElementById('funil-solucoes-tema'), buildFunnelByUnit(temaCards, TEMA_STAGES, true).etapas);
+    var temaEtapas = sliceEtapas(buildFunnelByUnit(temaCards, STAGE_DEFS.TEMA, true).etapas, 'Web');
+    renderFunnelByUnit(document.getElementById('funil-solucoes-tema'), temaEtapas);
     document.getElementById('funil-solucoes-tema-legend').innerHTML = UNIT_LEGEND;
-    renderFunnelByUnit(document.getElementById('funil-solucoes-video'), buildFunnelByUnit(video, VIDEO_STAGES, true).etapas);
+    var videoEtapas = sliceEtapas(buildFunnelByUnit(video, STAGE_DEFS.VIDEO, true).etapas, 'Web');
+    renderFunnelByUnit(document.getElementById('funil-solucoes-video'), videoEtapas);
     document.getElementById('funil-solucoes-video-legend').innerHTML = UNIT_LEGEND;
-    renderObjetosPorTipo('funil-solucoes-obj', 'funil-solucoes-obj-legend', content, OBJ_STAGES);
+    renderObjetosPorTipo('funil-solucoes-obj', 'funil-solucoes-obj-legend', content, STAGE_DEFS.OBJ, 'Web');
 
     renderFilasDuplo('filas-solucoes',
-      buildQueueChain(temaCards, TEMA_STAGES), 'Conteúdo (Tema) até a Web',
-      buildQueueChain(video, VIDEO_STAGES), 'Vídeo até a Web');
+      filterQueueTo(buildQueueChain(temaCards, STAGE_DEFS.TEMA), TEMA_STAGES), 'Conteúdo (Tema) até a Web',
+      filterQueueTo(buildQueueChain(video, STAGE_DEFS.VIDEO), VIDEO_STAGES), 'Vídeo até a Web');
 
-    var rowsTema = unitBreakdown(temaCards, TEMA_STAGES).map(function(u){
-      var last = u.etapas[u.etapas.length-1];
-      return '<div class="hbar-row"><div class="hbar-label">Tema — '+u.unidade+'</div>'+
-        '<div class="hbar-track"><div class="hbar-fill" style="background:'+UNIT_COLOR[u.unidade_num]+';width:'+last.pct+'%"></div></div>'+
-        '<div class="hbar-nums"><b>'+n(last.n)+'</b>/'+n(u.total)+' · '+pct(last.pct)+'</div></div>';
+    var rowsTema = ['1','2','3','4'].map(function(u){
+      var sub = temaCards.filter(function(c){ return c.unidade_num===u; });
+      var fFull = buildFunnelFlow(sub, STAGE_DEFS.TEMA);
+      var last = sliceEtapas(fFull.etapas, 'Web').slice(-1)[0];
+      return '<div class="hbar-row"><div class="hbar-label">Tema — Unidade '+u+'</div>'+
+        '<div class="hbar-track"><div class="hbar-fill" style="background:'+UNIT_COLOR[u]+';width:'+last.pct+'%"></div></div>'+
+        '<div class="hbar-nums"><b>'+n(last.n)+'</b>/'+n(fFull.total)+' · '+pct(last.pct)+'</div></div>';
     }).join('');
-    var rowsVideo = unitBreakdown(video, VIDEO_STAGES).map(function(u){
-      var last = u.etapas[u.etapas.length-1];
-      return '<div class="hbar-row"><div class="hbar-label">Vídeo — '+u.unidade+'</div>'+
-        '<div class="hbar-track"><div class="hbar-fill" style="background:'+UNIT_COLOR[u.unidade_num]+';width:'+last.pct+'%"></div></div>'+
-        '<div class="hbar-nums"><b>'+n(last.n)+'</b>/'+n(u.total)+' · '+pct(last.pct)+'</div></div>';
+    var rowsVideo = ['1','2','3','4'].map(function(u){
+      var sub = video.filter(function(c){ return c.unidade_num===u; });
+      var fFull = buildFunnelFlow(sub, STAGE_DEFS.VIDEO);
+      var last = sliceEtapas(fFull.etapas, 'Web').slice(-1)[0];
+      return '<div class="hbar-row"><div class="hbar-label">Vídeo — Unidade '+u+'</div>'+
+        '<div class="hbar-track"><div class="hbar-fill" style="background:'+UNIT_COLOR[u]+';width:'+last.pct+'%"></div></div>'+
+        '<div class="hbar-nums"><b>'+n(last.n)+'</b>/'+n(fFull.total)+' · '+pct(last.pct)+'</div></div>';
     }).join('');
     document.getElementById('unidade-solucoes').innerHTML = rowsTema + rowsVideo + '<div class="foot-note">% de cards com Web concluída, por unidade e pipeline.</div>';
 
