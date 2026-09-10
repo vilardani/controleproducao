@@ -190,13 +190,11 @@
     </div>
     <nav class="tabs" id="tabs">
       <button class="tab active" data-tab="visao">Visão Geral</button>
-      <button class="tab" data-tab="conteudo">Esteira de Conteúdo</button>
+      <button class="tab" data-tab="desenho">Desenho Educacional</button>
+      <button class="tab" data-tab="design">Design Educacional</button>
+      <button class="tab" data-tab="midia">Mídia Digital</button>
+      <button class="tab" data-tab="solucoes">Soluções Educacionais</button>
       <button class="tab" data-tab="bdq">Banco de Questões</button>
-      <button class="tab" data-tab="video">Esteira de Vídeo</button>
-      <button class="tab" data-tab="ritmo">Ritmo &amp; Backlog</button>
-      <button class="tab" data-tab="produtividade">Produtividade</button>
-      <button class="tab" data-tab="funcoes">Funções</button>
-      <button class="tab" data-tab="equipe">Visão por Equipe</button>
       <button class="tab" data-tab="extras">Cards Extras</button>
       <button class="tab" data-tab="consulta">Consultar Cards</button>
     </nav>
@@ -239,38 +237,191 @@
         </div>
       </div>
     </section>
-  </div>
 
-  <!-- ===================== ESTEIRA DE CONTEÚDO ===================== -->
-  <div class="panel" id="panel-conteudo">
     <section>
       <div class="section-head">
-        <h2>Funil — Tema (fluxo completo)</h2>
-        <div class="section-sub">Cards do tipo Tema (T2/T3/T4), únicos que passam pelas 6 etapas de qualidade e revisão do conteúdo textual (Tester DI e Tester Conteúdo viraram auditoria da liderança, não são mais etapa rastreada). Cada barra é dividida por unidade.</div>
+        <h2>Ritmo de entrega — cards finalizados por semana</h2>
+        <div class="section-sub">Data de conclusão da última etapa rastreada (Finalizado), por semana.</div>
       </div>
-      <div class="card pad"><div class="funnel" id="funil-tema"></div><div class="legend" id="funil-tema-legend"></div></div>
+      <div class="card pad"><div id="throughput-chart"></div></div>
     </section>
 
     <section>
       <div class="section-head">
-        <h2>Objetos de aprendizagem por tipo</h2>
-        <div class="section-sub">Plano de Ensino, Infográfico, Quiz e Podcast seguem um fluxo mais curto (sem DI). O Banco de Questões tem quadro próprio na aba "Banco de Questões". Cada barra é dividida por unidade.</div>
+        <h2>Envelhecimento do backlog ativo</h2>
+        <div class="section-sub">Dias desde a última atividade nos cards ainda não arquivados, por macro-fase.</div>
       </div>
-      <div class="grid-auto" id="funil-objetos"></div>
-      <div class="legend" id="funil-objetos-legend" style="margin-top:12px"></div>
+      <div class="card pad" id="aging-chart"></div>
+    </section>
+
+    <section>
+      <div class="section-head">
+        <h2>Top 25 cards mais parados</h2>
+        <button class="btn" id="export-parados">Exportar CSV</button>
+      </div>
+      <div class="table-wrap"><table id="tbl-parados"><thead><tr>
+        <th>Card</th><th>Pipeline</th><th>Etapa atual</th><th class="num">Dias parado</th><th></th>
+      </tr></thead><tbody></tbody></table></div>
+    </section>
+  </div>
+
+  <!-- ===================== DESENHO EDUCACIONAL ===================== -->
+  <div class="panel" id="panel-desenho">
+    <section>
+      <div class="section-head">
+        <h2>Desenho Educacional</h2>
+        <div class="section-sub">Etapas Qualidade 01, Qualidade 02, DI e Revisão — internos e externos. Ao concluir a Revisão o card é considerado entregue por esta equipe (Design Gráfico e Web seguem em outras áreas). Não inclui Banco de Questões, apurado à parte. Respeita os filtros globais no topo da página.</div>
+      </div>
+      <div class="kpi-grid" id="kpi-desenho"></div>
+    </section>
+
+    <section>
+      <div class="section-head"><h2>Funil — Tema</h2><div class="section-sub">Cards do tipo Tema (T2/T3/T4). Cada barra é dividida por unidade.</div></div>
+      <div class="card pad"><div class="funnel" id="funil-desenho-tema"></div><div class="legend" id="funil-desenho-tema-legend"></div></div>
+    </section>
+
+    <section>
+      <div class="section-head"><h2>Objetos por tipo</h2><div class="section-sub">Plano de Ensino, Infográfico, Quiz e Podcast, até a Revisão.</div></div>
+      <div class="grid-auto" id="funil-desenho-obj"></div>
+      <div class="legend" id="funil-desenho-obj-legend" style="margin-top:12px"></div>
     </section>
 
     <section>
       <div class="grid-2">
         <div>
-          <div class="section-head"><h2>Onde os cards ficam parados</h2><div class="section-sub">Tempo de fila entre o fim de uma etapa e o início da próxima (mediana e p90, em dias) — Tema.</div></div>
-          <div class="card pad" id="filas-conteudo"></div>
+          <div class="section-head"><h2>Onde os cards ficam parados</h2><div class="section-sub">Tempo de fila entre etapas (mediana e p90, em dias).</div></div>
+          <div class="card pad" id="filas-desenho"></div>
         </div>
         <div>
           <div class="section-head"><h2>Tema — conclusão por unidade</h2></div>
-          <div class="card pad" id="tema-unidade"></div>
+          <div class="card pad" id="unidade-desenho"></div>
         </div>
       </div>
+    </section>
+
+    <section>
+      <div class="grid-2">
+        <div>
+          <div class="section-head"><h2>Atuando agora</h2><div class="section-sub">Cards ativos, parados numa etapa da equipe.</div></div>
+          <div class="table-wrap"><table id="tbl-desenho-atuando"><thead><tr>
+            <th>Card</th><th>Disciplina</th><th>Etapa</th><th class="num">Dias parado</th><th></th>
+          </tr></thead><tbody></tbody></table></div>
+        </div>
+        <div>
+          <div class="section-head"><h2>Aptos a avançar</h2><div class="section-sub">Etapa concluída, card ainda não movido de lista no Trello.</div></div>
+          <div class="table-wrap"><table id="tbl-desenho-aptos"><thead><tr>
+            <th>Card</th><th>Disciplina</th><th>Etapa concluída</th><th class="num">Concluído há</th><th></th>
+          </tr></thead><tbody></tbody></table></div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-head"><h2>Ritmo &amp; Backlog da equipe</h2><div class="section-sub">Tempo (mediana/p90, em dias) que os cards levam dentro de cada etapa.</div></div>
+      <div class="table-wrap"><table id="tbl-desenho-ritmo"><thead><tr>
+        <th>Etapa</th><th class="num">Cards agora</th><th class="num">Mediana na etapa</th><th class="num">p90</th>
+      </tr></thead><tbody></tbody></table></div>
+    </section>
+
+    <section>
+      <div class="grid-2">
+        <div>
+          <div class="section-head"><h2>Produtividade — por pessoa</h2></div>
+          <div class="table-wrap"><table id="tbl-desenho-pessoas"><thead><tr>
+            <th>Pessoa</th><th>Etapa principal</th><th class="num">Total</th><th class="num">28d</th>
+          </tr></thead><tbody></tbody></table></div>
+        </div>
+        <div>
+          <div class="section-head"><h2>Funções — por etapa</h2></div>
+          <div class="table-wrap"><table id="tbl-desenho-funcoes"><thead><tr>
+            <th>Etapa</th><th class="num">Concluídas</th><th class="num">28d</th>
+          </tr></thead><tbody></tbody></table></div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="toolbar"><span class="spacer"></span><button class="btn" id="export-desenho-detalhado">Exportar detalhado (CSV)</button></div>
+    </section>
+  </div>
+
+  <!-- ===================== DESIGN EDUCACIONAL ===================== -->
+  <div class="panel" id="panel-design">
+    <section>
+      <div class="section-head">
+        <h2>Design Educacional</h2>
+        <div class="section-sub">Etapa DG (Design Gráfico) — internos e externos. Cobre Tema e Objetos. Respeita os filtros globais no topo da página.</div>
+      </div>
+      <div class="kpi-grid" id="kpi-design"></div>
+    </section>
+
+    <section>
+      <div class="section-head"><h2>Funil — Tema</h2><div class="section-sub">Cards do tipo Tema (T2/T3/T4), até o DG. Cada barra é dividida por unidade.</div></div>
+      <div class="card pad"><div class="funnel" id="funil-design-tema"></div><div class="legend" id="funil-design-tema-legend"></div></div>
+    </section>
+
+    <section>
+      <div class="section-head"><h2>Objetos por tipo</h2><div class="section-sub">Plano de Ensino, Infográfico, Quiz e Podcast, até o DG.</div></div>
+      <div class="grid-auto" id="funil-design-obj"></div>
+      <div class="legend" id="funil-design-obj-legend" style="margin-top:12px"></div>
+    </section>
+
+    <section>
+      <div class="grid-2">
+        <div>
+          <div class="section-head"><h2>Onde os cards ficam parados</h2><div class="section-sub">Tempo de fila entre etapas (mediana e p90, em dias).</div></div>
+          <div class="card pad" id="filas-design"></div>
+        </div>
+        <div>
+          <div class="section-head"><h2>Tema — conclusão por unidade</h2></div>
+          <div class="card pad" id="unidade-design"></div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="grid-2">
+        <div>
+          <div class="section-head"><h2>Atuando agora</h2><div class="section-sub">Cards ativos, parados na etapa DG.</div></div>
+          <div class="table-wrap"><table id="tbl-design-atuando"><thead><tr>
+            <th>Card</th><th>Disciplina</th><th>Etapa</th><th class="num">Dias parado</th><th></th>
+          </tr></thead><tbody></tbody></table></div>
+        </div>
+        <div>
+          <div class="section-head"><h2>Aptos a avançar</h2><div class="section-sub">DG concluído, card ainda não movido de lista no Trello.</div></div>
+          <div class="table-wrap"><table id="tbl-design-aptos"><thead><tr>
+            <th>Card</th><th>Disciplina</th><th>Etapa concluída</th><th class="num">Concluído há</th><th></th>
+          </tr></thead><tbody></tbody></table></div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-head"><h2>Ritmo &amp; Backlog da equipe</h2><div class="section-sub">Tempo (mediana/p90, em dias) que os cards levam dentro do DG.</div></div>
+      <div class="table-wrap"><table id="tbl-design-ritmo"><thead><tr>
+        <th>Etapa</th><th class="num">Cards agora</th><th class="num">Mediana na etapa</th><th class="num">p90</th>
+      </tr></thead><tbody></tbody></table></div>
+    </section>
+
+    <section>
+      <div class="grid-2">
+        <div>
+          <div class="section-head"><h2>Produtividade — por pessoa</h2></div>
+          <div class="table-wrap"><table id="tbl-design-pessoas"><thead><tr>
+            <th>Pessoa</th><th>Etapa principal</th><th class="num">Total</th><th class="num">28d</th>
+          </tr></thead><tbody></tbody></table></div>
+        </div>
+        <div>
+          <div class="section-head"><h2>Funções — por etapa</h2></div>
+          <div class="table-wrap"><table id="tbl-design-funcoes"><thead><tr>
+            <th>Etapa</th><th class="num">Concluídas</th><th class="num">28d</th>
+          </tr></thead><tbody></tbody></table></div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="toolbar"><span class="spacer"></span><button class="btn" id="export-design-detalhado">Exportar detalhado (CSV)</button></div>
     </section>
   </div>
 
@@ -306,27 +457,35 @@
     </section>
   </div>
 
-  <!-- ===================== ESTEIRA DE VÍDEO ===================== -->
-  <div class="panel" id="panel-video">
+  <!-- ===================== MÍDIA DIGITAL ===================== -->
+  <div class="panel" id="panel-midia">
+    <section>
+      <div class="section-head">
+        <h2>Mídia Digital</h2>
+        <div class="section-sub">Etapas Roteiro, Liberação Conteudista, Gravação e Edição — internos e externos. Ao concluir a Edição o card é considerado entregue por esta equipe (Web segue com Soluções Educacionais). Respeita os filtros globais no topo da página.</div>
+      </div>
+      <div class="kpi-grid" id="kpi-midia"></div>
+    </section>
+
     <section>
       <div class="section-head">
         <h2>Funil por formato de vídeo</h2>
-        <div class="section-sub">Conceituando (CONC), Prática em Evidência (PEV) e EADúvida (EDUV) — mesmo fluxo de produção. Cada barra é dividida por unidade.</div>
+        <div class="section-sub">Conceituando (CONC), Prática em Evidência (PEV) e EADúvida (EDUV), até a Edição. Cada barra é dividida por unidade.</div>
       </div>
-      <div class="grid-3" id="funil-video"></div>
-      <div class="legend" id="funil-video-legend" style="margin-top:12px"></div>
-      <div class="foot-note" id="funil-video-note" style="margin-top:6px"></div>
+      <div class="grid-3" id="funil-midia"></div>
+      <div class="legend" id="funil-midia-legend" style="margin-top:12px"></div>
+      <div class="foot-note" id="funil-midia-note" style="margin-top:6px"></div>
     </section>
 
     <section>
       <div class="grid-2">
         <div>
           <div class="section-head"><h2>Onde os vídeos ficam parados</h2><div class="section-sub">Tempo de fila entre etapas (mediana e p90, em dias).</div></div>
-          <div class="card pad" id="filas-video"></div>
+          <div class="card pad" id="filas-midia"></div>
         </div>
         <div>
           <div class="section-head"><h2>Vídeo — conclusão por unidade</h2></div>
-          <div class="card pad" id="video-unidade"></div>
+          <div class="card pad" id="unidade-midia"></div>
         </div>
       </div>
     </section>
@@ -335,179 +494,139 @@
       <div class="section-head"><h2>Dependência de conteudista externo</h2></div>
       <div class="card pad" id="dependencia-externa"></div>
     </section>
-  </div>
 
-  <!-- ===================== RITMO & BACKLOG ===================== -->
-  <div class="panel" id="panel-ritmo">
     <section>
-      <div class="section-head">
-        <h2>Ritmo de entrega — cards finalizados por semana</h2>
-        <div class="section-sub">Data de conclusão do Tester de Conteúdo (última etapa antes da publicação), por semana.</div>
+      <div class="grid-2">
+        <div>
+          <div class="section-head"><h2>Atuando agora</h2><div class="section-sub">Cards ativos, parados numa etapa da equipe.</div></div>
+          <div class="table-wrap"><table id="tbl-midia-atuando"><thead><tr>
+            <th>Card</th><th>Disciplina</th><th>Etapa</th><th class="num">Dias parado</th><th></th>
+          </tr></thead><tbody></tbody></table></div>
+        </div>
+        <div>
+          <div class="section-head"><h2>Aptos a avançar</h2><div class="section-sub">Etapa concluída, card ainda não movido de lista no Trello.</div></div>
+          <div class="table-wrap"><table id="tbl-midia-aptos"><thead><tr>
+            <th>Card</th><th>Disciplina</th><th>Etapa concluída</th><th class="num">Concluído há</th><th></th>
+          </tr></thead><tbody></tbody></table></div>
+        </div>
       </div>
-      <div class="card pad"><div id="throughput-chart"></div></div>
     </section>
 
     <section>
-      <div class="section-head">
-        <h2>Envelhecimento do backlog ativo</h2>
-        <div class="section-sub">Dias desde a última atividade nos cards ainda não arquivados, por macro-fase.</div>
-      </div>
-      <div class="card pad" id="aging-chart"></div>
-    </section>
-
-    <section>
-      <div class="section-head">
-        <h2>Top 25 cards mais parados</h2>
-        <button class="btn" id="export-parados">Exportar CSV</button>
-      </div>
-      <div class="table-wrap"><table id="tbl-parados"><thead><tr>
-        <th>Card</th><th>Pipeline</th><th>Etapa atual</th><th class="num">Dias parado</th><th></th>
+      <div class="section-head"><h2>Ritmo &amp; Backlog da equipe</h2><div class="section-sub">Tempo (mediana/p90, em dias) que os cards levam dentro de cada etapa.</div></div>
+      <div class="table-wrap"><table id="tbl-midia-ritmo"><thead><tr>
+        <th>Etapa</th><th class="num">Cards agora</th><th class="num">Mediana na etapa</th><th class="num">p90</th>
       </tr></thead><tbody></tbody></table></div>
-    </section>
-  </div>
-
-  <!-- ===================== PRODUTIVIDADE ===================== -->
-  <div class="panel" id="panel-produtividade">
-    <section>
-      <div class="section-head">
-        <h2>Produtividade por equipe e pessoa</h2>
-        <div class="section-sub">Baseado no campo "responsável" de cada etapa concluída (não no campo Members, que é uma lista livre de envolvidos) — cobre as 12 etapas com data de conclusão registrada.</div>
-      </div>
-      <div class="kpi-grid" id="kpi-produtividade"></div>
-    </section>
-
-    <section>
-      <div class="section-head"><h2>Ritmo semanal por equipe</h2><div class="section-sub">Etapas concluídas por semana (últimas 16 semanas).</div></div>
-      <div class="card pad"><div id="produtividade-chart"></div></div>
     </section>
 
     <section>
       <div class="grid-2">
         <div>
-          <div class="section-head"><h2>Por equipe</h2></div>
-          <div class="table-wrap"><table id="tbl-equipes"><thead><tr>
-            <th>Equipe</th><th class="num">Pessoas</th><th class="num">Concluídas (total)</th><th class="num">Últimos 28d</th>
+          <div class="section-head"><h2>Produtividade — por pessoa</h2></div>
+          <div class="table-wrap"><table id="tbl-midia-pessoas"><thead><tr>
+            <th>Pessoa</th><th>Etapa principal</th><th class="num">Total</th><th class="num">28d</th>
           </tr></thead><tbody></tbody></table></div>
         </div>
         <div>
-          <div class="section-head"><h2>Por pessoa</h2></div>
-          <div class="table-wrap"><table id="tbl-pessoas"><thead><tr>
-            <th>Pessoa</th><th>Equipe</th><th>Etapa principal</th><th class="num">Total</th><th class="num">28d</th>
+          <div class="section-head"><h2>Funções — por etapa</h2></div>
+          <div class="table-wrap"><table id="tbl-midia-funcoes"><thead><tr>
+            <th>Etapa</th><th class="num">Concluídas</th><th class="num">28d</th>
           </tr></thead><tbody></tbody></table></div>
         </div>
       </div>
-      <div class="foot-note">"Não mapeado" = responsáveis (Jéssica, Rafael) que não constam na composição de equipes que temos registrada. "Externo" = marcado explicitamente como "(EXTERNO)" na coluna de responsável, independente do nome.</div>
+    </section>
+
+    <section>
+      <div class="toolbar"><span class="spacer"></span><button class="btn" id="export-midia-detalhado">Exportar detalhado (CSV)</button></div>
     </section>
   </div>
 
-  <!-- ===================== FUNÇÕES ===================== -->
-  <div class="panel" id="panel-funcoes">
+  <!-- ===================== SOLUÇÕES EDUCACIONAIS ===================== -->
+  <div class="panel" id="panel-solucoes">
     <section>
       <div class="section-head">
-        <h2>Produtividade por função</h2>
-        <div class="section-sub">Etapas agrupadas por função de trabalho, não por equipe organizacional: Design Gráfico (DG), DI, Qualidade (Qualidade 01/02), Vídeo (Roteiro, Liberação Conteudista, Gravação, Edição), Revisão e Webdesign (Web).</div>
+        <h2>Soluções Educacionais</h2>
+        <div class="section-sub">Etapa Web — internos e externos. Abrange conteúdo (Tema e Objetos) e vídeo. Respeita os filtros globais no topo da página.</div>
       </div>
-      <div class="kpi-grid" id="kpi-funcoes"></div>
+      <div class="kpi-grid" id="kpi-solucoes"></div>
     </section>
 
     <section>
-      <div class="section-head">
-        <h2>Histórico</h2>
-        <div class="seg" id="funcao-granularidade">
-          <button class="active" data-g="dia">Dia</button>
-          <button data-g="semana">Semana</button>
-          <button data-g="mes">Mês</button>
+      <div class="grid-2">
+        <div>
+          <div class="section-head"><h2>Funil — Tema</h2><div class="section-sub">Até a Web. Cada barra é dividida por unidade.</div></div>
+          <div class="card pad"><div class="funnel" id="funil-solucoes-tema"></div><div class="legend" id="funil-solucoes-tema-legend"></div></div>
+        </div>
+        <div>
+          <div class="section-head"><h2>Funil — Vídeo</h2><div class="section-sub">Até a Web. Cada barra é dividida por unidade.</div></div>
+          <div class="card pad"><div class="funnel" id="funil-solucoes-video"></div><div class="legend" id="funil-solucoes-video-legend"></div></div>
         </div>
       </div>
-      <div class="section-sub" style="margin-bottom:10px">Etapas concluídas por função, por período. Passe o mouse sobre os pontos para ver o valor exato.</div>
-      <div class="card pad"><div id="funcoes-chart"></div></div>
     </section>
 
     <section>
-      <div class="section-head"><h2>Resumo por função</h2></div>
-      <div class="table-wrap"><table id="tbl-funcoes"><thead><tr>
-        <th>Função</th><th class="num">Total</th><th class="num">Últ. 7 dias</th><th class="num">Últ. 28 dias</th><th>Tendência (7d)</th><th>Etapa principal</th><th>Destaque</th>
+      <div class="section-head"><h2>Objetos por tipo</h2><div class="section-sub">Plano de Ensino, Infográfico, Quiz e Podcast, até a Web.</div></div>
+      <div class="grid-auto" id="funil-solucoes-obj"></div>
+      <div class="legend" id="funil-solucoes-obj-legend" style="margin-top:12px"></div>
+    </section>
+
+    <section>
+      <div class="grid-2">
+        <div>
+          <div class="section-head"><h2>Onde os cards ficam parados</h2><div class="section-sub">Tempo de fila até a Web — conteúdo e vídeo (mediana e p90, em dias).</div></div>
+          <div class="card pad" id="filas-solucoes"></div>
+        </div>
+        <div>
+          <div class="section-head"><h2>Conclusão por unidade</h2></div>
+          <div class="card pad" id="unidade-solucoes"></div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="grid-2">
+        <div>
+          <div class="section-head"><h2>Atuando agora</h2><div class="section-sub">Cards ativos, parados na Web.</div></div>
+          <div class="table-wrap"><table id="tbl-solucoes-atuando"><thead><tr>
+            <th>Card</th><th>Disciplina</th><th>Etapa</th><th class="num">Dias parado</th><th></th>
+          </tr></thead><tbody></tbody></table></div>
+        </div>
+        <div>
+          <div class="section-head"><h2>Aptos a avançar</h2><div class="section-sub">Web concluída, card ainda não movido de lista no Trello.</div></div>
+          <div class="table-wrap"><table id="tbl-solucoes-aptos"><thead><tr>
+            <th>Card</th><th>Disciplina</th><th>Etapa concluída</th><th class="num">Concluído há</th><th></th>
+          </tr></thead><tbody></tbody></table></div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-head"><h2>Ritmo &amp; Backlog da equipe</h2><div class="section-sub">Tempo (mediana/p90, em dias) que os cards levam dentro da Web.</div></div>
+      <div class="table-wrap"><table id="tbl-solucoes-ritmo"><thead><tr>
+        <th>Etapa</th><th class="num">Cards agora</th><th class="num">Mediana na etapa</th><th class="num">p90</th>
       </tr></thead><tbody></tbody></table></div>
-      <div class="foot-note">Tendência compara os últimos 7 dias com os 7 dias imediatamente anteriores.</div>
     </section>
 
     <section>
-      <div class="section-head">
-        <h2>Composição por etapa</h2>
-        <div class="section-sub">O que compõe cada função, etapa a etapa.</div>
+      <div class="grid-2">
+        <div>
+          <div class="section-head"><h2>Produtividade — por pessoa</h2></div>
+          <div class="table-wrap"><table id="tbl-solucoes-pessoas"><thead><tr>
+            <th>Pessoa</th><th>Etapa principal</th><th class="num">Total</th><th class="num">28d</th>
+          </tr></thead><tbody></tbody></table></div>
+        </div>
+        <div>
+          <div class="section-head"><h2>Funções — por etapa</h2></div>
+          <div class="table-wrap"><table id="tbl-solucoes-funcoes"><thead><tr>
+            <th>Etapa</th><th class="num">Concluídas</th><th class="num">28d</th>
+          </tr></thead><tbody></tbody></table></div>
+        </div>
       </div>
-      <div class="grid-auto" id="funcoes-composicao"></div>
     </section>
-  </div>
 
-  <!-- ===================== VISÃO POR EQUIPE ===================== -->
-  <div class="panel" id="panel-equipe">
     <section>
-      <div class="section-head">
-        <h2>Visão por Equipe</h2>
-        <div class="section-sub">Funil, ritmo, produtividade e exportação detalhada por área — para cada liderança acompanhar só a própria etapa. Respeita os filtros globais de disciplina/unidade/produto no topo da página.</div>
-      </div>
-      <div class="toolbar">
-        <select id="gf-visao-equipe">
-          <option value="">Selecione uma equipe…</option>
-          <option value="Desenho Educacional">Desenho Educacional</option>
-          <option value="Design Educacional">Design Educacional</option>
-          <option value="Mídia Digital">Mídia Digital</option>
-          <option value="Soluções Educacionais">Soluções Educacionais</option>
-        </select>
-        <span class="spacer"></span>
-        <button class="btn" id="export-equipe-detalhado" disabled>Exportar detalhado (CSV)</button>
-      </div>
+      <div class="toolbar"><span class="spacer"></span><button class="btn" id="export-solucoes-detalhado">Exportar detalhado (CSV)</button></div>
     </section>
-
-    <div id="equipe-vazio" class="card pad"><div class="foot-note">Selecione uma equipe acima para ver o painel.</div></div>
-
-    <div id="equipe-conteudo" style="display:none">
-      <section>
-        <div class="kpi-grid" id="kpi-equipe"></div>
-      </section>
-
-      <section>
-        <div class="grid-2">
-          <div>
-            <div class="section-head"><h2>Atuando agora</h2><div class="section-sub">Cards ativos, parados numa etapa da equipe.</div></div>
-            <div class="table-wrap"><table id="tbl-equipe-atuando"><thead><tr>
-              <th>Card</th><th>Disciplina</th><th>Etapa</th><th class="num">Dias parado</th><th></th>
-            </tr></thead><tbody></tbody></table></div>
-          </div>
-          <div>
-            <div class="section-head"><h2>Aptos a avançar</h2><div class="section-sub">Etapa da equipe já concluída, card ainda não movido de lista no Trello.</div></div>
-            <div class="table-wrap"><table id="tbl-equipe-aptos"><thead><tr>
-              <th>Card</th><th>Disciplina</th><th>Etapa concluída</th><th class="num">Concluído há</th><th></th>
-            </tr></thead><tbody></tbody></table></div>
-          </div>
-        </div>
-      </section>
-
-      <section>
-        <div class="section-head"><h2>Ritmo &amp; Backlog da equipe</h2><div class="section-sub">Tempo (mediana/p90, em dias) que os cards levam dentro de cada etapa da equipe.</div></div>
-        <div class="table-wrap"><table id="tbl-equipe-ritmo"><thead><tr>
-          <th>Etapa</th><th class="num">Cards agora</th><th class="num">Mediana na etapa</th><th class="num">p90</th>
-        </tr></thead><tbody></tbody></table></div>
-      </section>
-
-      <section>
-        <div class="grid-2">
-          <div>
-            <div class="section-head"><h2>Produtividade — por pessoa</h2></div>
-            <div class="table-wrap"><table id="tbl-equipe-pessoas"><thead><tr>
-              <th>Pessoa</th><th>Etapa principal</th><th class="num">Total</th><th class="num">28d</th>
-            </tr></thead><tbody></tbody></table></div>
-          </div>
-          <div>
-            <div class="section-head"><h2>Funções — por etapa</h2></div>
-            <div class="table-wrap"><table id="tbl-equipe-funcoes"><thead><tr>
-              <th>Etapa</th><th class="num">Concluídas</th><th class="num">28d</th>
-            </tr></thead><tbody></tbody></table></div>
-          </div>
-        </div>
-      </section>
-    </div>
   </div>
 
   <!-- ===================== CARDS EXTRAS ===================== -->
@@ -598,6 +717,12 @@
     VIDEO: ['Recebimento','Roteiro','Liberação Conteudista','Gravação','Edição','Web','Finalizado'],
     BDQ:   ['Recebimento','Web (publicado)']
   };
+  // Corta uma lista de etapas logo após `lastLabel` — usada para que o funil/fila/conclusão
+  // de cada painel de equipe pare exatamente na última etapa que aquela equipe é dona.
+  function truncateStages(list, lastLabel){
+    var idx = list.indexOf(lastLabel);
+    return idx>=0 ? list.slice(0, idx+1) : list.slice();
+  }
 
   // ---------------- math helpers ----------------
   function median(sorted){
@@ -1022,7 +1147,7 @@
     }).join('') : '<tr><td colspan="2" class="foot-note">Nenhuma pendência de conteúdo nesta seleção.</td></tr>';
     document.getElementById('disc-pendentes').innerHTML =
       '<div class="table-wrap"><table><thead><tr><th>Disciplina</th><th class="num">Unidades concluídas</th></tr></thead><tbody>'+discHtml+'</tbody></table></div>'+
-      '<div class="foot-note">Unidades de Tema com Tester de Conteúdo concluído, de 4 possíveis.</div>';
+      '<div class="foot-note">Unidades de Tema finalizadas (chegaram à Web), de 4 possíveis.</div>';
 
     var topMini = topParados(cards, 8);
     var topHtml = topMini.length ? topMini.map(function(c){
@@ -1076,19 +1201,14 @@
     container.innerHTML = rows + '<div class="foot-note">Barra = mediana do tempo de fila. Traço = p90 (10% dos cards esperam mais que isso). n = '+filas.reduce(function(a,f){return a+f.n;},0)+' transições observadas.</div>';
   }
 
-  function renderConteudo(cards){
-    var content = cards.filter(function(c){ return c.pipeline==='conteudo' && !c.template_teste; });
-    var temaCards = content.filter(function(c){ return isTemaTipo(c.tipo); });
-    renderFunnelByUnit(document.getElementById('funil-tema'), buildFunnelByUnit(temaCards, STAGE_DEFS.TEMA, true).etapas);
-    document.getElementById('funil-tema-legend').innerHTML = UNIT_LEGEND;
-
-    // Plano de Ensino é um card único por disciplina (unidade "PE", não U1-U4) — não tem o que
-    // colorir por unidade, então mantém funil de cor única; INF/QUIZ/POD são por unidade 1-4.
+  // Plano de Ensino é um card único por disciplina (unidade "PE", não U1-U4) — não tem o que
+  // colorir por unidade, então mantém funil de cor única; INF/QUIZ/POD são por unidade 1-4.
+  function renderObjetosPorTipo(containerId, legendId, content, objStages){
     var codesPorUnidade = ['INF','QUIZ','POD'];
     var objLabel = {INF:'Infográfico', QUIZ:'Quiz', POD:'Podcast', PE:'Plano de Ensino'};
     var htmlPorUnidade = codesPorUnidade.map(function(code){
       var sub = content.filter(function(c){ return c.tipo===code; });
-      var f = buildFunnelByUnit(sub, STAGE_DEFS.OBJ, true);
+      var f = buildFunnelByUnit(sub, objStages, true);
       if(!f.total) return '<div class="card pad mini-funnel"><h3>'+objLabel[code]+' <span class="foot-note" style="display:inline">(0)</span></h3><div class="foot-note" style="margin-top:8px">Nenhum card nesta seleção.</div></div>';
       var max = f.etapas[0].n || 1;
       var rows = f.etapas.map(function(e){
@@ -1105,7 +1225,7 @@
     // Plano de Ensino é identificado pela unidade (PE, sem número), não pelo tipo —
     // o tipo real desses cards varia (ex.: INT), só a unidade é sempre "PE".
     var peCards = content.filter(function(c){ return c.unidade_num===null; });
-    var fPe = buildFunnelFlow(peCards, STAGE_DEFS.OBJ);
+    var fPe = buildFunnelFlow(peCards, objStages);
     var htmlPe;
     if(!fPe.total){
       htmlPe = '<div class="card pad mini-funnel"><h3>Plano de Ensino <span class="foot-note" style="display:inline">(0)</span></h3><div class="foot-note" style="margin-top:8px">Nenhum card nesta seleção.</div></div>';
@@ -1118,18 +1238,52 @@
       }).join('');
       htmlPe = '<div class="card pad mini-funnel"><h3>Plano de Ensino <span class="foot-note" style="display:inline">('+n(fPe.total)+')</span> <span class="foot-note" style="display:inline">— um card por disciplina, sem unidade</span></h3><div class="funnel" style="margin-top:8px">'+rowsPe+'</div></div>';
     }
-    document.getElementById('funil-objetos').innerHTML = htmlPorUnidade + htmlPe;
-    document.getElementById('funil-objetos-legend').innerHTML = UNIT_LEGEND;
+    document.getElementById(containerId).innerHTML = htmlPorUnidade + htmlPe;
+    document.getElementById(legendId).innerHTML = UNIT_LEGEND;
+  }
 
-    renderQueue(document.getElementById('filas-conteudo'), buildQueueChain(temaCards, STAGE_DEFS.TEMA));
-
-    var rows = unitBreakdown(temaCards, STAGE_DEFS.TEMA).map(function(u){
+  function renderUnitBreakdown(containerId, cardsForUnit, stages, color, footnote){
+    var rows = unitBreakdown(cardsForUnit, stages).map(function(u){
       var last = u.etapas[u.etapas.length-1];
       return '<div class="hbar-row"><div class="hbar-label">'+u.unidade+'</div>'+
-        '<div class="hbar-track"><div class="hbar-fill" style="background:'+UNIT_COLOR[u.unidade_num]+';width:'+last.pct+'%"></div></div>'+
+        '<div class="hbar-track"><div class="hbar-fill" style="background:'+(color||UNIT_COLOR[u.unidade_num])+';width:'+last.pct+'%"></div></div>'+
         '<div class="hbar-nums"><b>'+n(last.n)+'</b>/'+n(u.total)+' · '+pct(last.pct)+'</div></div>';
     }).join('');
-    document.getElementById('tema-unidade').innerHTML = rows + '<div class="foot-note">% de Temas Finalizados, por unidade.</div>';
+    document.getElementById(containerId).innerHTML = rows + '<div class="foot-note">'+footnote+'</div>';
+  }
+
+  // ================= Desenho Educacional (Qualidade 01, Qualidade 02, DI, Revisão) =================
+  function renderTeamDesenho(cardsAll){
+    var content = cardsAll.filter(function(c){ return c.pipeline==='conteudo' && !c.template_teste; });
+    var temaCards = content.filter(function(c){ return isTemaTipo(c.tipo); });
+    var TEMA_STAGES = truncateStages(STAGE_DEFS.TEMA, 'Revisão');
+    var OBJ_STAGES = truncateStages(STAGE_DEFS.OBJ, 'Revisão');
+
+    renderFunnelByUnit(document.getElementById('funil-desenho-tema'), buildFunnelByUnit(temaCards, TEMA_STAGES, true).etapas);
+    document.getElementById('funil-desenho-tema-legend').innerHTML = UNIT_LEGEND;
+    renderObjetosPorTipo('funil-desenho-obj', 'funil-desenho-obj-legend', content, OBJ_STAGES);
+    renderQueue(document.getElementById('filas-desenho'), buildQueueChain(temaCards, TEMA_STAGES));
+    renderUnitBreakdown('unidade-desenho', temaCards, TEMA_STAGES, null, '% de Temas com Revisão concluída, por unidade.');
+
+    var ops = renderTeamOps('desenho', 'Desenho Educacional', ['Qualidade 01','Qualidade 02','DI','Revisão'], content);
+    document.getElementById('kpi-desenho').innerHTML = teamKpiTiles(ops.atuando, ops.aptos, ['Qualidade 01','Qualidade 02','DI','Revisão']);
+  }
+
+  // ================= Design Educacional (DG) =================
+  function renderTeamDesign(cardsAll){
+    var content = cardsAll.filter(function(c){ return c.pipeline==='conteudo' && !c.template_teste; });
+    var temaCards = content.filter(function(c){ return isTemaTipo(c.tipo); });
+    var TEMA_STAGES = truncateStages(STAGE_DEFS.TEMA, 'DG');
+    var OBJ_STAGES = truncateStages(STAGE_DEFS.OBJ, 'DG');
+
+    renderFunnelByUnit(document.getElementById('funil-design-tema'), buildFunnelByUnit(temaCards, TEMA_STAGES, true).etapas);
+    document.getElementById('funil-design-tema-legend').innerHTML = UNIT_LEGEND;
+    renderObjetosPorTipo('funil-design-obj', 'funil-design-obj-legend', content, OBJ_STAGES);
+    renderQueue(document.getElementById('filas-design'), buildQueueChain(temaCards, TEMA_STAGES));
+    renderUnitBreakdown('unidade-design', temaCards, TEMA_STAGES, null, '% de Temas com DG concluído, por unidade.');
+
+    var ops = renderTeamOps('design', 'Design Educacional', ['DG'], content);
+    document.getElementById('kpi-design').innerHTML = teamKpiTiles(ops.atuando, ops.aptos, ['DG']);
   }
 
   // ================= Banco de Questões =================
@@ -1186,14 +1340,13 @@
     ]);
   });
 
-  // ================= Esteira de Vídeo =================
-  function renderVideo(cards){
-    var video = cards.filter(function(c){ return c.pipeline==='video' && !c.template_teste; });
+  // ================= Mídia Digital (Roteiro, Liberação Conteudista, Gravação, Edição) =================
+  function renderFunilVideoPorFormato(containerId, legendId, noteId, video, videoStages){
     var codes = ['CONC','PEV','EDUV'];
     var vidLabel = {CONC:'Conceituando', PEV:'Prática em Evidência', EDUV:'EADúvida'};
     var html = codes.map(function(code){
       var sub = video.filter(function(c){ return c.tipo===code; });
-      var f = buildFunnelByUnit(sub, STAGE_DEFS.VIDEO, true);
+      var f = buildFunnelByUnit(sub, videoStages, true);
       if(!f.total) return '<div class="card pad mini-funnel"><h3>'+vidLabel[code]+' <span class="foot-note" style="display:inline">(0)</span></h3><div class="foot-note" style="margin-top:8px">Nenhum card nesta seleção.</div></div>';
       var max = f.etapas[0].n || 1;
       var rows = f.etapas.map(function(e){
@@ -1207,22 +1360,22 @@
       }).join('');
       return '<div class="card pad mini-funnel"><h3>'+vidLabel[code]+' <span class="foot-note" style="display:inline">('+n(f.total)+')</span></h3><div class="funnel" style="margin-top:8px">'+rows+'</div></div>';
     }).join('');
-    document.getElementById('funil-video').innerHTML = html;
-    document.getElementById('funil-video-legend').innerHTML = UNIT_LEGEND;
-    document.getElementById('funil-video-note').innerHTML = 'Se um card já alcançou uma etapa posterior, as etapas anteriores contam como concluídas mesmo sem data registrada (ex.: Web já finalizada com Liberação Conteudista em aberto).';
+    document.getElementById(containerId).innerHTML = html;
+    document.getElementById(legendId).innerHTML = UNIT_LEGEND;
+    if(noteId) document.getElementById(noteId).innerHTML = 'Se um card já alcançou uma etapa posterior, as etapas anteriores contam como concluídas mesmo sem data registrada.';
+  }
 
-    var queue = buildQueueChain(video, STAGE_DEFS.VIDEO);
-    renderQueue(document.getElementById('filas-video'), queue);
+  function renderTeamMidia(cardsAll){
+    var video = cardsAll.filter(function(c){ return c.pipeline==='video' && !c.template_teste; });
+    var VIDEO_STAGES = truncateStages(STAGE_DEFS.VIDEO, 'Edição');
 
-    var rows = unitBreakdown(video, STAGE_DEFS.VIDEO, buildFunnelFlow).map(function(u){
-      var last = u.etapas[u.etapas.length-1];
-      return '<div class="hbar-row"><div class="hbar-label">'+u.unidade+'</div>'+
-        '<div class="hbar-track"><div class="hbar-fill" style="background:'+UNIT_COLOR[u.unidade_num]+';width:'+last.pct+'%"></div></div>'+
-        '<div class="hbar-nums"><b>'+n(last.n)+'</b>/'+n(u.total)+' · '+pct(last.pct)+'</div></div>';
-    }).join('');
-    document.getElementById('video-unidade').innerHTML = rows + '<div class="foot-note">% de vídeos com Tester de Conteúdo concluído, por unidade.</div>';
+    renderFunilVideoPorFormato('funil-midia', 'funil-midia-legend', 'funil-midia-note', video, VIDEO_STAGES);
 
-    var dep = dependenciaExterna(cards);
+    var queue = buildQueueChain(video, VIDEO_STAGES);
+    renderQueue(document.getElementById('filas-midia'), queue);
+    renderUnitBreakdown('unidade-midia', video, VIDEO_STAGES, null, '% de vídeos com Edição concluída, por unidade.');
+
+    var dep = dependenciaExterna(cardsAll);
     var totalClassificado = dep.INTERNO+dep.EXTERNO;
     var lib = queue.filter(function(f){return f.de==='Liberação Conteudista' && f.para==='Gravação';})[0];
     var extPct = totalClassificado ? 100*dep.EXTERNO/totalClassificado : 0;
@@ -1236,10 +1389,13 @@
       '<div class="kpi"><div class="label">Fila após liberação (aguardando gravação)</div><div class="value">'+(lib?d1(lib.mediana)+'d':'—')+'</div><div class="sub">mediana · p90 '+(lib?d1(lib.p90)+'d':'—')+'</div></div>'+
       '</div>'+
       '<div class="foot-note" style="margin-top:8px">Contagem por disciplina, não por card — cada disciplina tem um único conteudista. '+notaPartes.join(' · ')+'.</div>'+
-      '<div class="callout" style="margin-top:14px"><b>Ponto de atenção:</b> a etapa Liberação Conteudista → Gravação concentra a maior fila de todo o painel (ver aba "Ritmo &amp; Backlog" / funil de vídeo). Como depende de aprovação do conteudista, é o gargalo mais estrutural da esteira de vídeo.</div>';
+      '<div class="callout" style="margin-top:14px"><b>Ponto de atenção:</b> a etapa Liberação Conteudista → Gravação concentra a maior fila do funil de vídeo. Como depende de aprovação do conteudista, é o gargalo mais estrutural da esteira.</div>';
+
+    var ops = renderTeamOps('midia', 'Mídia Digital', ['Roteiro','Liberação Conteudista','Gravação','Edição'], video);
+    document.getElementById('kpi-midia').innerHTML = teamKpiTiles(ops.atuando, ops.aptos, ['Roteiro','Liberação Conteudista','Gravação','Edição']);
   }
 
-  // ================= Ritmo & Backlog =================
+  // ================= Ritmo & Backlog (agora dentro da Visão Geral) =================
   var currentTopParados = [];
   function renderRitmo(cards){
     var valid = cards.filter(function(c){ return !c.template_teste; });
@@ -1303,205 +1459,133 @@
     ]);
   });
 
-  // ================= Produtividade (por pessoa e por equipe organizacional) =================
-  function renderProdutividade(cards){
-    var valid = cards.filter(function(c){ return !c.template_teste; });
-    var prod = buildProdutividade(valid);
-    var pessoas = prod.pessoas, equipes = prod.equipes;
-    var totalConcluidas = prod.totalEventos;
-    var maiorEquipe = equipes.slice().sort(function(a,b){return b.total_concluidas-a.total_concluidas;})[0];
-    var maisAtivos28d = pessoas.slice().sort(function(a,b){return b.ultimos_28d-a.ultimos_28d;})[0];
+  // ================= Núcleo compartilhado dos painéis por equipe =================
+  // "Atuando agora" / "Aptos a avançar" / Ritmo / Produtividade / Funções — a mesma lógica
+  // se repete em cada painel de equipe, só muda a lista de etapas e o rótulo da equipe.
+  var EQUIPE_STAGE_SUFFIXES = [' | PRODUÇÃO'];
+  function stripStageSuffix(s){
+    for(var i=0;i<EQUIPE_STAGE_SUFFIXES.length;i++){
+      var suf = EQUIPE_STAGE_SUFFIXES[i];
+      if(s.slice(-suf.length)===suf) return s.slice(0, -suf.length);
+    }
+    return s;
+  }
+  function fmtDataHora(iso){
+    if(!iso) return '—';
+    return new Date(iso).toLocaleString('pt-BR', {day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+  }
+  function teamKpiTiles(atuando, aptos, stages){
     var tiles = [
-      {label:'Etapas concluídas (total)', value:n(totalConcluidas), sub:'com responsável identificado'},
-      {label:'Pessoas com registro', value:n(pessoas.length), sub:equipes.length+' grupos (equipes + externos)'},
-      {label:'Equipe com mais entregas', value:maiorEquipe?maiorEquipe.equipe:'—', sub:maiorEquipe?n(maiorEquipe.total_concluidas)+' etapas':''},
-      {label:'Mais ativo(a) nos últimos 28d', value:maisAtivos28d?maisAtivos28d.pessoa:'—', sub:maisAtivos28d?n(maisAtivos28d.ultimos_28d)+' etapas':'', accent:true},
+      {label:'Atuando agora', value:n(atuando.length), sub:'cards ativos nas etapas da equipe'},
+      {label:'Aptos a avançar', value:n(aptos.length), sub:'etapa concluída, card ainda não movido', accent:true},
+      {label:'Etapas cobertas', value:n(stages.length), sub:stages.join(', ')}
     ];
-    document.getElementById('kpi-produtividade').innerHTML = tiles.map(function(t){
-      return '<div class="kpi'+(t.accent?' accent':'')+'"><div class="label">'+esc(t.label)+'</div><div class="value">'+esc(t.value)+'</div><div class="sub">'+esc(t.sub)+'</div></div>';
+    return tiles.map(function(t){
+      return '<div class="kpi'+(t.accent?' accent':'')+'"><div class="label">'+esc(t.label)+'</div><div class="value">'+t.value+'</div><div class="sub">'+esc(t.sub)+'</div></div>';
     }).join('');
+  }
+  var currentTeamExport = {};
+  function renderTeamOps(prefix, eqLabel, stages, cards){
+    var stageByUpper = {};
+    stages.forEach(function(s){ stageByUpper[s.toUpperCase()] = s; });
 
-    document.querySelector('#tbl-equipes tbody').innerHTML = equipes.length ? equipes.map(function(e){
-      return '<tr><td><span class="pill p-neutral" style="background:none"><span class="dot" style="background:'+(CAT.equipe[e.equipe]||'var(--ink-3)')+'"></span>'+esc(e.equipe)+'</span></td>'+
-        '<td class="num">'+n(e.pessoas)+'</td><td class="num">'+n(e.total_concluidas)+'</td><td class="num">'+n(e.ultimos_28d)+'</td></tr>';
+    // "Atuando agora": card ativo, sentado numa lista que corresponde a uma etapa da equipe.
+    var atuando = [];
+    cards.forEach(function(c){
+      if(c.arquivado) return;
+      var stage = stageByUpper[stripStageSuffix(c.etapa_atual)];
+      if(stage) atuando.push({card:c, etapa:stage});
+    });
+    atuando.sort(function(a,b){ return (b.card.dias_parado||0)-(a.card.dias_parado||0); });
+
+    // "Aptos a avançar": a etapa (mesma lista atual) já tem "fim" registrado —
+    // ou seja, já foi dada como concluída, mas o card não foi arrastado ainda.
+    var aptos = [];
+    atuando.forEach(function(a){
+      var st = a.card.stages[a.etapa];
+      if(st && st.fim) aptos.push({card:a.card, etapa:a.etapa, fim:st.fim});
+    });
+    aptos.sort(function(x,y){ return new Date(x.fim)-new Date(y.fim); });
+
+    document.querySelector('#tbl-'+prefix+'-atuando tbody').innerHTML = atuando.length ? atuando.map(function(a){
+      var c = a.card, sev = agingSeverity(c.dias_parado);
+      return '<tr><td><a class="row-link" target="_blank" rel="noopener" href="'+esc(c.url)+'"><span class="card-name" title="'+esc(c.nome)+'">'+esc(c.nome)+'</span></a></td>'+
+        '<td>'+esc(c.disciplina||'—')+'</td><td>'+esc(a.etapa)+'</td>'+
+        '<td class="num"><span class="pill '+sev.c+'">'+d1(c.dias_parado)+'d</span></td>'+
+        '<td><a class="row-link" target="_blank" rel="noopener" href="'+esc(c.url)+'">Trello ↗</a></td></tr>';
+    }).join('') : '<tr><td colspan="5" class="foot-note">Nenhum card ativo nesta seleção.</td></tr>';
+
+    document.querySelector('#tbl-'+prefix+'-aptos tbody').innerHTML = aptos.length ? aptos.map(function(a){
+      var c = a.card, dias = round1(daysBetween(a.fim, SNAPSHOT_DATE));
+      return '<tr><td><a class="row-link" target="_blank" rel="noopener" href="'+esc(c.url)+'"><span class="card-name" title="'+esc(c.nome)+'">'+esc(c.nome)+'</span></a></td>'+
+        '<td>'+esc(c.disciplina||'—')+'</td><td>'+esc(a.etapa)+'</td>'+
+        '<td class="num">'+d1(dias)+'d</td>'+
+        '<td><a class="row-link" target="_blank" rel="noopener" href="'+esc(c.url)+'">Trello ↗</a></td></tr>';
+    }).join('') : '<tr><td colspan="5" class="foot-note">Nenhum card apto nesta seleção.</td></tr>';
+
+    // Ritmo & Backlog: tempo (ini→fim) dentro de cada etapa da equipe.
+    var ritmoRows = stages.map(function(stage){
+      var agora = atuando.filter(function(a){ return a.etapa===stage; }).length;
+      var diffs = [];
+      cards.forEach(function(c){
+        var st = c.stages[stage];
+        if(st && st.ini && st.fim){ var d = daysBetween(st.ini, st.fim); diffs.push(d<0?0:d); }
+      });
+      var st = statsOf(diffs);
+      return '<tr><td>'+esc(stage)+'</td><td class="num">'+n(agora)+'</td>'+
+        '<td class="num">'+(st?d1(st.mediana)+'d':'—')+'</td><td class="num">'+(st?d1(st.p90)+'d':'—')+'</td></tr>';
+    }).join('');
+    document.querySelector('#tbl-'+prefix+'-ritmo tbody').innerHTML = ritmoRows;
+
+    // Produtividade — por pessoa (reaproveita buildProdutividade, filtra pela equipe).
+    var prod = buildProdutividade(cards);
+    var pessoasEquipe = prod.pessoas.filter(function(p){ return p.equipe===eqLabel; });
+    document.querySelector('#tbl-'+prefix+'-pessoas tbody').innerHTML = pessoasEquipe.length ? pessoasEquipe.map(function(p){
+      return '<tr><td>'+esc(p.pessoa)+'</td><td>'+esc(p.etapa_principal)+'</td>'+
+        '<td class="num"><b>'+n(p.total_concluidas)+'</b></td><td class="num">'+n(p.ultimos_28d)+'</td></tr>';
     }).join('') : '<tr><td colspan="4" class="foot-note">Sem registros nesta seleção.</td></tr>';
 
-    document.querySelector('#tbl-pessoas tbody').innerHTML = pessoas.length ? pessoas.map(function(p){
-      return '<tr><td>'+esc(p.pessoa)+'</td><td>'+esc(p.equipe)+'</td><td>'+esc(p.etapa_principal)+'</td>'+
-        '<td class="num"><b>'+n(p.total_concluidas)+'</b></td><td class="num">'+n(p.ultimos_28d)+'</td></tr>';
-    }).join('') : '<tr><td colspan="5" class="foot-note">Sem registros nesta seleção.</td></tr>';
-
-    var weeks = {};
-    var teams = ['Desenho Educacional','Design Educacional','Mídia Digital','Soluções Educacionais','Externo','Não mapeado'];
-    prod.produtividade_semanal.forEach(function(r){ if(!weeks[r.semana]) weeks[r.semana]={}; weeks[r.semana][r.equipe]=r.n; });
-    var keys = Object.keys(weeks).sort().slice(-16);
-    if(!keys.length){
-      document.getElementById('produtividade-chart').innerHTML = '<div class="foot-note">Sem dados nesta seleção.</div>';
-      return;
-    }
-    var max = 1;
-    keys.forEach(function(k){ var t=0; teams.forEach(function(tm){t+=weeks[k][tm]||0;}); max=Math.max(max,t); });
-    var w = 46, gap = 8, chartW = keys.length*(w+gap), chartH = 210, base = chartH-24;
-    var bars = keys.map(function(k, i){
-      var x = i*(w+gap), yCursor = base;
-      var segs = teams.map(function(tm){
-        var v = weeks[k][tm]||0, h = base*(v/max);
-        yCursor -= h;
-        return v>0 ? '<rect x="0" y="'+yCursor+'" width="'+w+'" height="'+h+'" fill="'+CAT.equipe[tm]+'" rx="2"></rect>' : '';
-      }).join('');
-      var dt = new Date(k+'T00:00:00');
-      var label = dt.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'});
-      return '<g transform="translate('+x+',0)">'+segs+'<text x="'+(w/2)+'" y="'+(base+16)+'" text-anchor="middle" font-size="10" fill="var(--ink-3)" font-family="var(--font-mono)">'+label+'</text></g>';
-    }).join('');
-    var svg = '<svg viewBox="0 0 '+chartW+' '+chartH+'" width="100%" style="max-width:'+(chartW+40)+'px;overflow:visible" role="img" aria-label="Etapas concluídas por semana e equipe"><line x1="0" y1="'+base+'" x2="'+chartW+'" y2="'+base+'" stroke="var(--grid-strong)"></line>'+bars+'</svg>';
-    var legend = teams.map(function(tm){ return '<span class="legend-item"><span class="swatch" style="background:'+CAT.equipe[tm]+'"></span>'+tm+'</span>'; }).join('');
-    document.getElementById('produtividade-chart').innerHTML = '<div style="overflow-x:auto">'+svg+'</div><div class="legend">'+legend+'</div>';
-  }
-
-  // ================= Funções (Design Gráfico, DI, Qualidade, Vídeo, Revisão, Webdesign) =================
-  var FUNCAO_MAP = {
-    'Qualidade 01':'Qualidade', 'Qualidade 02':'Qualidade',
-    'DI':'DI',
-    'DG':'Design Gráfico',
-    'Revisão':'Revisão',
-    'Roteiro':'Vídeo', 'Liberação Conteudista':'Vídeo', 'Gravação':'Vídeo', 'Edição':'Vídeo',
-    'Web':'Webdesign'
-  };
-  var FUNCAO_ORDER = ['Design Gráfico','DI','Qualidade','Vídeo','Revisão','Webdesign'];
-  var FUNCAO_COLOR = {'Design Gráfico':'var(--cat-1)','DI':'var(--cat-2)','Qualidade':'var(--cat-3)','Vídeo':'var(--cat-4)','Revisão':'var(--cat-5)','Webdesign':'var(--cat-6)'};
-  var funcaoGranularity = 'dia';
-
-  function buildFuncaoEvents(cards){
-    var events = [];
+    // Funções — por etapa (só eventos atribuídos a essa equipe).
+    var cutoff28 = new Date(SNAPSHOT_DATE.getTime() - 28*86400000);
+    var porEtapa = {};
+    stages.forEach(function(s){ porEtapa[s] = {etapa:s, total:0, d28:0}; });
     cards.forEach(function(c){
-      if(c.template_teste) return;
       (c.resp_stages||[]).forEach(function(ev){
-        var funcao = FUNCAO_MAP[ev.etapa];
-        if(!funcao) return;
-        events.push({funcao:funcao, etapa:ev.etapa, pessoa:ev.pessoa, data:ev.data});
+        if(ev.equipe!==eqLabel || !porEtapa[ev.etapa]) return;
+        porEtapa[ev.etapa].total++;
+        if(new Date(ev.data) >= cutoff28) porEtapa[ev.etapa].d28++;
       });
     });
-    return events;
-  }
-  function periodKey(dateStr, granularity){
-    var d = new Date(dateStr);
-    if(granularity==='dia') return d.toISOString().slice(0,10);
-    if(granularity==='semana') return weekStartMonday(d);
-    var mm = d.getUTCMonth()+1;
-    return d.getUTCFullYear()+'-'+(mm<10?'0':'')+mm;
-  }
-  function buildFuncaoSeries(events, granularity, limitPeriods){
-    var counts = {}, periodSet = {};
-    events.forEach(function(e){
-      var k = periodKey(e.data, granularity);
-      periodSet[k] = true;
-      var key = k+'|'+e.funcao;
-      counts[key] = (counts[key]||0)+1;
+    document.querySelector('#tbl-'+prefix+'-funcoes tbody').innerHTML = stages.map(function(s){
+      var r = porEtapa[s];
+      return '<tr><td>'+esc(s)+'</td><td class="num">'+n(r.total)+'</td><td class="num">'+n(r.d28)+'</td></tr>';
+    }).join('');
+
+    // Export detalhado: uma linha por card+etapa da equipe, com início/fim.
+    var exportRows = [];
+    cards.forEach(function(c){
+      stages.forEach(function(stage){
+        var st = c.stages[stage];
+        if(!st || (!st.ini && !st.fim)) return;
+        exportRows.push({
+          card:c.nome, codigo:c.codigo||'', disciplina:c.disciplina||'', etapa:stage,
+          inicio:fmtDataHora(st.ini), fim:fmtDataHora(st.fim), url:c.url
+        });
+      });
     });
-    var periods = Object.keys(periodSet).sort().slice(-limitPeriods);
-    return {periods:periods, counts:counts};
+    currentTeamExport[prefix] = exportRows;
+
+    return {atuando:atuando, aptos:aptos, exportRows:exportRows};
   }
-  function buildFuncaoSummary(events){
-    var cutoff7 = new Date(SNAPSHOT_DATE.getTime() - 7*86400000);
-    var cutoff14 = new Date(SNAPSHOT_DATE.getTime() - 14*86400000);
-    var cutoff28 = new Date(SNAPSHOT_DATE.getTime() - 28*86400000);
-    var by = {};
-    FUNCAO_ORDER.forEach(function(f){ by[f] = {total:0, ult7:0, prev7:0, ult28:0, etapas:{}, pessoas:{}}; });
-    events.forEach(function(e){
-      var b = by[e.funcao]; if(!b) return;
-      b.total++;
-      var dt = new Date(e.data);
-      if(dt>=cutoff7) b.ult7++;
-      else if(dt>=cutoff14) b.prev7++;
-      if(dt>=cutoff28) b.ult28++;
-      b.etapas[e.etapa] = (b.etapas[e.etapa]||0)+1;
-      b.pessoas[e.pessoa] = (b.pessoas[e.pessoa]||0)+1;
+  ['desenho','design','midia','solucoes'].forEach(function(prefix){
+    var btn = document.getElementById('export-'+prefix+'-detalhado');
+    if(!btn) return;
+    btn.addEventListener('click', function(){
+      exportCSV(prefix+'-detalhado.csv', currentTeamExport[prefix]||[], [
+        {key:'card',label:'Card'},{key:'codigo',label:'Código'},{key:'disciplina',label:'Disciplina'},
+        {key:'etapa',label:'Etapa'},{key:'inicio',label:'Início'},{key:'fim',label:'Fim'},{key:'url',label:'URL'}
+      ]);
     });
-    return FUNCAO_ORDER.map(function(f){
-      var b = by[f];
-      var principal=null, mx=-1;
-      Object.keys(b.etapas).forEach(function(k){ if(b.etapas[k]>mx){ mx=b.etapas[k]; principal=k; } });
-      var topPessoa=null, mx2=-1;
-      Object.keys(b.pessoas).forEach(function(k){ if(b.pessoas[k]>mx2){ mx2=b.pessoas[k]; topPessoa=k; } });
-      var trend = b.prev7>0 ? Math.round(100*(b.ult7-b.prev7)/b.prev7) : (b.ult7>0?100:0);
-      return {funcao:f, total:b.total, ult7:b.ult7, prev7:b.prev7, ult28:b.ult28, trend:trend, etapa_principal:principal, pessoa_top:topPessoa, etapas:b.etapas};
-    });
-  }
-  function renderFuncaoChart(container, seriesData, granularity){
-    var periods = seriesData.periods;
-    if(!periods.length){ container.innerHTML = '<div class="foot-note">Sem dados nesta seleção.</div>'; return; }
-    var max = 1;
-    FUNCAO_ORDER.forEach(function(f){ periods.forEach(function(p){ max = Math.max(max, seriesData.counts[p+'|'+f]||0); }); });
-    var padL=6, padR=60, padT=10, padB=26;
-    var chartW = Math.max(560, periods.length*(periods.length>20?26:40));
-    var stepX = periods.length>1 ? (chartW-padL-padR)/(periods.length-1) : 0;
-    var chartH = 220, plotH = chartH-padT-padB;
-    function yOf(v){ return padT + plotH - (plotH*v/max); }
-    function xOf(i){ return padL + i*stepX; }
-    var gridLines = '';
-    for(var i=0;i<=4;i++){
-      var v = Math.round(max*i/4), y = yOf(v);
-      gridLines += '<line x1="'+padL+'" y1="'+y+'" x2="'+(chartW-padR)+'" y2="'+y+'" stroke="var(--grid)"></line>';
-      gridLines += '<text x="'+(chartW-padR+6)+'" y="'+(y+3)+'" font-size="10" fill="var(--ink-3)" font-family="var(--font-mono)">'+v+'</text>';
-    }
-    var lines = FUNCAO_ORDER.map(function(f){
-      var pts = periods.map(function(p,i){ return xOf(i)+','+yOf(seriesData.counts[p+'|'+f]||0); }).join(' ');
-      var dots = periods.map(function(p,i){
-        var val = seriesData.counts[p+'|'+f]||0;
-        return '<circle cx="'+xOf(i)+'" cy="'+yOf(val)+'" r="2.6" fill="'+FUNCAO_COLOR[f]+'"><title>'+f+' · '+p+': '+val+'</title></circle>';
-      }).join('');
-      return '<polyline points="'+pts+'" fill="none" stroke="'+FUNCAO_COLOR[f]+'" stroke-width="2"></polyline>'+dots;
-    }).join('');
-    var everyN = Math.max(1, Math.ceil(periods.length/10));
-    var xLabels = periods.map(function(p,i){
-      if(i%everyN!==0 && i!==periods.length-1) return '';
-      var lbl = granularity==='mes' ? p : new Date(p+'T00:00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'});
-      return '<text x="'+xOf(i)+'" y="'+(chartH-8)+'" text-anchor="middle" font-size="9.5" fill="var(--ink-3)" font-family="var(--font-mono)">'+lbl+'</text>';
-    }).join('');
-    var svg = '<svg viewBox="0 0 '+chartW+' '+chartH+'" width="100%" style="max-width:'+(chartW+20)+'px;overflow:visible" role="img" aria-label="Etapas concluídas por função ao longo do tempo">'+gridLines+lines+xLabels+'</svg>';
-    var legend = FUNCAO_ORDER.map(function(f){ return '<span class="legend-item"><span class="swatch" style="background:'+FUNCAO_COLOR[f]+'"></span>'+f+'</span>'; }).join('');
-    container.innerHTML = '<div style="overflow-x:auto">'+svg+'</div><div class="legend">'+legend+'</div>';
-  }
-  function renderFuncoes(cards){
-    var valid = cards.filter(function(c){ return !c.template_teste; });
-    var events = buildFuncaoEvents(valid);
-    var summary = buildFuncaoSummary(events);
-
-    document.getElementById('kpi-funcoes').innerHTML = summary.map(function(s){
-      var trendTxt = (s.trend>0?'+':'')+s.trend+'%';
-      return '<div class="kpi"><div class="label">'+esc(s.funcao)+'</div><div class="value">'+n(s.total)+'</div>'+
-        '<div class="sub">'+n(s.ult7)+' últ. 7d ('+trendTxt+' vs 7d anteriores)</div></div>';
-    }).join('');
-
-    var limit = funcaoGranularity==='dia' ? 30 : (funcaoGranularity==='semana' ? 16 : 12);
-    var series = buildFuncaoSeries(events, funcaoGranularity, limit);
-    renderFuncaoChart(document.getElementById('funcoes-chart'), series, funcaoGranularity);
-
-    document.querySelector('#tbl-funcoes tbody').innerHTML = summary.length ? summary.map(function(s){
-      var sev = s.trend>=0 ? 'p-good' : (s.trend>=-20 ? 'p-warning' : 'p-critical');
-      return '<tr><td><span class="dot" style="background:'+FUNCAO_COLOR[s.funcao]+';display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;"></span>'+esc(s.funcao)+'</td>'+
-        '<td class="num">'+n(s.total)+'</td><td class="num">'+n(s.ult7)+'</td><td class="num">'+n(s.ult28)+'</td>'+
-        '<td><span class="pill '+sev+'">'+(s.trend>0?'+':'')+s.trend+'%</span></td>'+
-        '<td>'+esc(s.etapa_principal||'—')+'</td><td>'+esc(s.pessoa_top||'—')+'</td></tr>';
-    }).join('') : '<tr><td colspan="7" class="foot-note">Sem registros nesta seleção.</td></tr>';
-
-    document.getElementById('funcoes-composicao').innerHTML = summary.map(function(s){
-      var etapas = Object.keys(s.etapas).map(function(k){ return {etapa:k, n:s.etapas[k]}; }).sort(function(a,b){ return b.n-a.n; });
-      var mx = etapas.length ? etapas[0].n : 1;
-      var rows = etapas.map(function(e){
-        return '<div class="funnel-row" style="grid-template-columns:118px 1fr 46px;padding:4px 0;"><div class="funnel-label" style="font-size:11px">'+esc(e.etapa)+'</div>'+
-          '<div class="funnel-track" style="height:14px"><div class="funnel-fill" style="width:'+(100*e.n/mx)+'%;background:'+FUNCAO_COLOR[s.funcao]+'"></div></div>'+
-          '<div class="funnel-num" style="font-size:11px">'+n(e.n)+'</div></div>';
-      }).join('');
-      return '<div class="card pad mini-funnel"><h3>'+esc(s.funcao)+' <span class="foot-note" style="display:inline">('+n(s.total)+')</span></h3><div class="funnel" style="margin-top:8px">'+(rows||'<div class="foot-note">Sem dados nesta seleção.</div>')+'</div></div>';
-    }).join('');
-  }
-  document.getElementById('funcao-granularidade').addEventListener('click', function(e){
-    var btn = e.target.closest('button'); if(!btn) return;
-    funcaoGranularity = btn.dataset.g;
-    document.querySelectorAll('#funcao-granularidade button').forEach(function(b){ b.classList.remove('active'); });
-    btn.classList.add('active');
-    renderFuncoes(scopedCards());
   });
 
   // ================= Cards Extras =================
@@ -1543,152 +1627,57 @@
     ]);
   });
 
-  // ================= Visão por Equipe =================
-  // Etapas (e pipelines onde elas existem) que cada equipe é dona — espelha
-  // STAGE_TO_EQUIPE do build_data.py.
-  var TEAM_STAGES = {
-    'Desenho Educacional':   {pipelines:['conteudo'],          stages:['Qualidade 01','Qualidade 02','DI','Revisão']},
-    'Design Educacional':    {pipelines:['conteudo'],          stages:['DG']},
-    'Mídia Digital':         {pipelines:['video'],             stages:['Roteiro','Liberação Conteudista','Gravação','Edição']},
-    'Soluções Educacionais': {pipelines:['conteudo','video'],  stages:['Web']},
-  };
-  var EQUIPE_STAGE_SUFFIXES = [' | PRODUÇÃO'];
-  function stripStageSuffix(s){
-    for(var i=0;i<EQUIPE_STAGE_SUFFIXES.length;i++){
-      var suf = EQUIPE_STAGE_SUFFIXES[i];
-      if(s.slice(-suf.length)===suf) return s.slice(0, -suf.length);
+  // ================= Soluções Educacionais (Web — conteúdo e vídeo) =================
+  function renderFilasDuplo(containerId, filasA, labelA, filasB, labelB){
+    function block(filas, label){
+      if(!filas.length) return '<h3 style="margin:0 0 8px">'+label+'</h3><div class="foot-note">Sem transições suficientes nesta seleção para medir fila.</div>';
+      var max = Math.max.apply(null, filas.map(function(f){return f.p90;})) || 1;
+      var rows = filas.slice().sort(function(a,b){return b.mediana-a.mediana;}).map(function(f){
+        var wMed = 100*f.mediana/max, wP90 = 100*f.p90/max;
+        return '<div class="hbar-row"><div class="hbar-label">'+esc(f.de)+'<span class="arrow">→</span>'+esc(f.para)+'</div>'+
+          '<div class="hbar-track"><div class="hbar-fill" style="width:'+wMed+'%"></div><div class="hbar-p90tick" style="left:'+wP90+'%"></div></div>'+
+          '<div class="hbar-nums"><b>'+d1(f.mediana)+'d</b> mediana · p90 '+d1(f.p90)+'d</div></div>';
+      }).join('');
+      return '<h3 style="margin:0 0 8px">'+label+'</h3>'+rows;
     }
-    return s;
+    document.getElementById(containerId).innerHTML = block(filasA, labelA) + '<div style="height:16px"></div>' + block(filasB, labelB);
   }
-  function fmtDataHora(iso){
-    if(!iso) return '—';
-    return new Date(iso).toLocaleString('pt-BR', {day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+  function renderTeamSolucoes(cardsAll){
+    var content = cardsAll.filter(function(c){ return c.pipeline==='conteudo' && !c.template_teste; });
+    var video = cardsAll.filter(function(c){ return c.pipeline==='video' && !c.template_teste; });
+    var temaCards = content.filter(function(c){ return isTemaTipo(c.tipo); });
+    var TEMA_STAGES = truncateStages(STAGE_DEFS.TEMA, 'Web');
+    var OBJ_STAGES = truncateStages(STAGE_DEFS.OBJ, 'Web');
+    var VIDEO_STAGES = truncateStages(STAGE_DEFS.VIDEO, 'Web');
+
+    renderFunnelByUnit(document.getElementById('funil-solucoes-tema'), buildFunnelByUnit(temaCards, TEMA_STAGES, true).etapas);
+    document.getElementById('funil-solucoes-tema-legend').innerHTML = UNIT_LEGEND;
+    renderFunnelByUnit(document.getElementById('funil-solucoes-video'), buildFunnelByUnit(video, VIDEO_STAGES, true).etapas);
+    document.getElementById('funil-solucoes-video-legend').innerHTML = UNIT_LEGEND;
+    renderObjetosPorTipo('funil-solucoes-obj', 'funil-solucoes-obj-legend', content, OBJ_STAGES);
+
+    renderFilasDuplo('filas-solucoes',
+      buildQueueChain(temaCards, TEMA_STAGES), 'Conteúdo (Tema) até a Web',
+      buildQueueChain(video, VIDEO_STAGES), 'Vídeo até a Web');
+
+    var rowsTema = unitBreakdown(temaCards, TEMA_STAGES).map(function(u){
+      var last = u.etapas[u.etapas.length-1];
+      return '<div class="hbar-row"><div class="hbar-label">Tema — '+u.unidade+'</div>'+
+        '<div class="hbar-track"><div class="hbar-fill" style="background:'+UNIT_COLOR[u.unidade_num]+';width:'+last.pct+'%"></div></div>'+
+        '<div class="hbar-nums"><b>'+n(last.n)+'</b>/'+n(u.total)+' · '+pct(last.pct)+'</div></div>';
+    }).join('');
+    var rowsVideo = unitBreakdown(video, VIDEO_STAGES).map(function(u){
+      var last = u.etapas[u.etapas.length-1];
+      return '<div class="hbar-row"><div class="hbar-label">Vídeo — '+u.unidade+'</div>'+
+        '<div class="hbar-track"><div class="hbar-fill" style="background:'+UNIT_COLOR[u.unidade_num]+';width:'+last.pct+'%"></div></div>'+
+        '<div class="hbar-nums"><b>'+n(last.n)+'</b>/'+n(u.total)+' · '+pct(last.pct)+'</div></div>';
+    }).join('');
+    document.getElementById('unidade-solucoes').innerHTML = rowsTema + rowsVideo + '<div class="foot-note">% de cards com Web concluída, por unidade e pipeline.</div>';
+
+    var cards = content.concat(video);
+    var ops = renderTeamOps('solucoes', 'Soluções Educacionais', ['Web'], cards);
+    document.getElementById('kpi-solucoes').innerHTML = teamKpiTiles(ops.atuando, ops.aptos, ['Web']);
   }
-  var currentEquipeExport = [];
-  function renderEquipeView(){
-    var eq = document.getElementById('gf-visao-equipe').value;
-    var exportBtn = document.getElementById('export-equipe-detalhado');
-    if(!eq){
-      document.getElementById('equipe-vazio').style.display = '';
-      document.getElementById('equipe-conteudo').style.display = 'none';
-      exportBtn.disabled = true;
-      currentEquipeExport = [];
-      return;
-    }
-    document.getElementById('equipe-vazio').style.display = 'none';
-    document.getElementById('equipe-conteudo').style.display = '';
-    exportBtn.disabled = false;
-
-    var cfg = TEAM_STAGES[eq];
-    var stageByUpper = {};
-    cfg.stages.forEach(function(s){ stageByUpper[s.toUpperCase()] = s; });
-
-    var cards = scopedCards().filter(function(c){
-      return !c.template_teste && cfg.pipelines.indexOf(c.pipeline)>=0;
-    });
-
-    // "Atuando agora": card ativo, sentado numa lista que corresponde a uma etapa da equipe.
-    var atuando = [];
-    cards.forEach(function(c){
-      if(c.arquivado) return;
-      var stage = stageByUpper[stripStageSuffix(c.etapa_atual)];
-      if(stage) atuando.push({card:c, etapa:stage});
-    });
-    atuando.sort(function(a,b){ return (b.card.dias_parado||0)-(a.card.dias_parado||0); });
-
-    // "Aptos a avançar": a etapa (mesma lista atual) já tem "fim" registrado —
-    // ou seja, já foi dada como concluída, mas o card não foi arrastado ainda.
-    var aptos = [];
-    atuando.forEach(function(a){
-      var st = a.card.stages[a.etapa];
-      if(st && st.fim) aptos.push({card:a.card, etapa:a.etapa, fim:st.fim});
-    });
-    aptos.sort(function(x,y){ return new Date(x.fim)-new Date(y.fim); });
-
-    var tiles = [
-      {label:'Atuando agora', value:n(atuando.length), sub:'cards ativos nas etapas da equipe'},
-      {label:'Aptos a avançar', value:n(aptos.length), sub:'etapa concluída, card ainda não movido', accent:true},
-      {label:'Etapas cobertas', value:n(cfg.stages.length), sub:cfg.stages.join(', ')},
-    ];
-    document.getElementById('kpi-equipe').innerHTML = tiles.map(function(t){
-      return '<div class="kpi'+(t.accent?' accent':'')+'"><div class="label">'+esc(t.label)+'</div><div class="value">'+t.value+'</div><div class="sub">'+esc(t.sub)+'</div></div>';
-    }).join('');
-
-    document.querySelector('#tbl-equipe-atuando tbody').innerHTML = atuando.length ? atuando.map(function(a){
-      var c = a.card, sev = agingSeverity(c.dias_parado);
-      return '<tr><td><a class="row-link" target="_blank" rel="noopener" href="'+esc(c.url)+'"><span class="card-name" title="'+esc(c.nome)+'">'+esc(c.nome)+'</span></a></td>'+
-        '<td>'+esc(c.disciplina||'—')+'</td><td>'+esc(a.etapa)+'</td>'+
-        '<td class="num"><span class="pill '+sev.c+'">'+d1(c.dias_parado)+'d</span></td>'+
-        '<td><a class="row-link" target="_blank" rel="noopener" href="'+esc(c.url)+'">Trello ↗</a></td></tr>';
-    }).join('') : '<tr><td colspan="5" class="foot-note">Nenhum card ativo nesta seleção.</td></tr>';
-
-    document.querySelector('#tbl-equipe-aptos tbody').innerHTML = aptos.length ? aptos.map(function(a){
-      var c = a.card, dias = round1(daysBetween(a.fim, SNAPSHOT_DATE));
-      return '<tr><td><a class="row-link" target="_blank" rel="noopener" href="'+esc(c.url)+'"><span class="card-name" title="'+esc(c.nome)+'">'+esc(c.nome)+'</span></a></td>'+
-        '<td>'+esc(c.disciplina||'—')+'</td><td>'+esc(a.etapa)+'</td>'+
-        '<td class="num">'+d1(dias)+'d</td>'+
-        '<td><a class="row-link" target="_blank" rel="noopener" href="'+esc(c.url)+'">Trello ↗</a></td></tr>';
-    }).join('') : '<tr><td colspan="5" class="foot-note">Nenhum card apto nesta seleção.</td></tr>';
-
-    // Ritmo & Backlog: tempo (ini→fim) dentro de cada etapa da equipe.
-    var ritmoRows = cfg.stages.map(function(stage){
-      var agora = atuando.filter(function(a){ return a.etapa===stage; }).length;
-      var diffs = [];
-      cards.forEach(function(c){
-        var st = c.stages[stage];
-        if(st && st.ini && st.fim){ var d = daysBetween(st.ini, st.fim); diffs.push(d<0?0:d); }
-      });
-      var st = statsOf(diffs);
-      return '<tr><td>'+esc(stage)+'</td><td class="num">'+n(agora)+'</td>'+
-        '<td class="num">'+(st?d1(st.mediana)+'d':'—')+'</td><td class="num">'+(st?d1(st.p90)+'d':'—')+'</td></tr>';
-    }).join('');
-    document.querySelector('#tbl-equipe-ritmo tbody').innerHTML = ritmoRows;
-
-    // Produtividade — por pessoa (reaproveita buildProdutividade, filtra pela equipe).
-    var prod = buildProdutividade(cards);
-    var pessoasEquipe = prod.pessoas.filter(function(p){ return p.equipe===eq; });
-    document.querySelector('#tbl-equipe-pessoas tbody').innerHTML = pessoasEquipe.length ? pessoasEquipe.map(function(p){
-      return '<tr><td>'+esc(p.pessoa)+'</td><td>'+esc(p.etapa_principal)+'</td>'+
-        '<td class="num"><b>'+n(p.total_concluidas)+'</b></td><td class="num">'+n(p.ultimos_28d)+'</td></tr>';
-    }).join('') : '<tr><td colspan="4" class="foot-note">Sem registros nesta seleção.</td></tr>';
-
-    // Funções — por etapa (só eventos atribuídos a essa equipe).
-    var cutoff28 = new Date(SNAPSHOT_DATE.getTime() - 28*86400000);
-    var porEtapa = {};
-    cfg.stages.forEach(function(s){ porEtapa[s] = {etapa:s, total:0, d28:0}; });
-    cards.forEach(function(c){
-      (c.resp_stages||[]).forEach(function(ev){
-        if(ev.equipe!==eq || !porEtapa[ev.etapa]) return;
-        porEtapa[ev.etapa].total++;
-        if(new Date(ev.data) >= cutoff28) porEtapa[ev.etapa].d28++;
-      });
-    });
-    document.querySelector('#tbl-equipe-funcoes tbody').innerHTML = cfg.stages.map(function(s){
-      var r = porEtapa[s];
-      return '<tr><td>'+esc(s)+'</td><td class="num">'+n(r.total)+'</td><td class="num">'+n(r.d28)+'</td></tr>';
-    }).join('');
-
-    // Export detalhado: uma linha por card+etapa da equipe, com início/fim.
-    currentEquipeExport = [];
-    cards.forEach(function(c){
-      cfg.stages.forEach(function(stage){
-        var st = c.stages[stage];
-        if(!st || (!st.ini && !st.fim)) return;
-        currentEquipeExport.push({
-          card:c.nome, codigo:c.codigo||'', disciplina:c.disciplina||'', etapa:stage,
-          inicio:fmtDataHora(st.ini), fim:fmtDataHora(st.fim), url:c.url
-        });
-      });
-    });
-  }
-  document.getElementById('gf-visao-equipe').addEventListener('change', renderEquipeView);
-  document.getElementById('export-equipe-detalhado').addEventListener('click', function(){
-    var eq = document.getElementById('gf-visao-equipe').value;
-    exportCSV('equipe-'+eq.toLowerCase().replace(/\s+/g,'-')+'-detalhado.csv', currentEquipeExport, [
-      {key:'card',label:'Card'},{key:'codigo',label:'Código'},{key:'disciplina',label:'Disciplina'},
-      {key:'etapa',label:'Etapa'},{key:'inicio',label:'Início'},{key:'fim',label:'Fim'},{key:'url',label:'URL'}
-    ]);
-  });
 
   // ================= Consultar Cards =================
   var CARDS = ALL_CARDS.filter(function(c){ return !c.template_teste; });
@@ -1769,14 +1758,13 @@
     var cards = scopedCards();
     renderMeta();
     renderVisaoGeral(cards);
-    renderConteudo(cards);
-    renderBdq(cards);
-    renderVideo(cards);
     renderRitmo(cards);
-    renderProdutividade(cards);
-    renderFuncoes(cards);
+    renderBdq(cards);
+    renderTeamDesenho(cards);
+    renderTeamDesign(cards);
+    renderTeamMidia(cards);
+    renderTeamSolucoes(cards);
     renderExtras(cards);
-    renderEquipeView();
     applyFilters();
   }
   renderAll();
