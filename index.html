@@ -108,6 +108,8 @@
   .funnel-fill{position:absolute;left:0;top:0;bottom:0;border-radius:5px;transition:width .4s ease;}
   .funnel-num{font-family:var(--font-mono);font-size:12.5px;text-align:right;color:var(--ink-2);white-space:nowrap;}
   .funnel-num b{color:var(--ink);font-size:13px;}
+  .funnel-seg{display:flex;align-items:center;justify-content:center;overflow:hidden;}
+  .funnel-seg span{font-family:var(--font-mono);font-size:10px;color:#fff;white-space:nowrap;text-shadow:0 1px 1px rgba(0,0,0,.35);}
 
   .legend{display:flex;flex-wrap:wrap;gap:12px;margin-top:10px;}
   .legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-2);}
@@ -124,6 +126,7 @@
   .mini-funnel .funnel-track{height:16px;}
   .mini-funnel .funnel-label{font-size:11px;}
   .mini-funnel .funnel-num{font-size:11px;}
+  .mini-funnel .funnel-seg span{font-size:8.5px;}
 
   /* ---------- queue / hbar chart ---------- */
   .hbar-row{display:grid;grid-template-columns:200px 1fr 150px;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border);}
@@ -709,6 +712,16 @@
   var UNIDADE_LABEL = {'1':'Unidade 1', '2':'Unidade 2', '3':'Unidade 3', '4':'Unidade 4', 'PE':'Plano de Ensino'};
   var UNIT_COLOR = {'1':'var(--cat-1)', '2':'var(--cat-2)', '3':'var(--cat-3)', '4':'var(--cat-4)'};
   var UNIT_LEGEND = ['1','2','3','4'].map(function(u){ return '<span class="legend-item"><span class="swatch" style="background:'+UNIT_COLOR[u]+'"></span>Unidade '+u+'</span>'; }).join('');
+  // Segmento de barra de funil colorido por unidade, com total e % (dentro da própria etapa)
+  // visíveis no próprio segmento — em segmentos muito estreitos (mini-funnels) o texto pode
+  // ficar cortado (overflow:hidden), o tooltip (title) cobre esse caso ao passar o mouse.
+  function unitSegHtml(s, max, rowTotal){
+    var w = 100*s.n/max;
+    if(w<=0) return '';
+    var pctRow = rowTotal ? round1(100*s.n/rowTotal) : 0;
+    return '<div class="funnel-seg" style="width:'+w+'%;background:'+UNIT_COLOR[s.unidade]+'" title="Unidade '+s.unidade+': '+s.n+' ('+pct(pctRow)+')">'+
+      '<span>'+s.n+' · '+pct(pctRow)+'</span></div>';
+  }
 
   // ---------------- stage definitions (mirror build_data.py *_STAGES, labels only) ----------------
   var STAGE_DEFS = {
@@ -1177,10 +1190,7 @@
     var max = etapas.length ? etapas[0].n || 1 : 1;
     var cls = opts.mini ? ' mini-funnel' : '';
     var html = '<div class="funnel'+cls+'">' + etapas.map(function(e){
-      var segsHtml = e.segs.map(function(s){
-        var w = 100*s.n/max;
-        return w>0 ? '<div style="width:'+w+'%;background:'+UNIT_COLOR[s.unidade]+'" title="Unidade '+s.unidade+': '+s.n+'"></div>' : '';
-      }).join('');
+      var segsHtml = e.segs.map(function(s){ return unitSegHtml(s, max, e.n); }).join('');
       return '<div class="funnel-row"><div class="funnel-label">'+esc(e.etapa)+'</div>'+
         '<div class="funnel-track" style="display:flex">'+segsHtml+'</div>'+
         '<div class="funnel-num"><b>'+n(e.n)+'</b> · '+pct(e.pct)+'</div></div>';
@@ -1212,10 +1222,7 @@
       if(!f.total) return '<div class="card pad mini-funnel"><h3>'+objLabel[code]+' <span class="foot-note" style="display:inline">(0)</span></h3><div class="foot-note" style="margin-top:8px">Nenhum card nesta seleção.</div></div>';
       var max = f.etapas[0].n || 1;
       var rows = f.etapas.map(function(e){
-        var segsHtml = e.segs.map(function(s){
-          var w = 100*s.n/max;
-          return w>0 ? '<div style="width:'+w+'%;background:'+UNIT_COLOR[s.unidade]+'" title="Unidade '+s.unidade+': '+s.n+'"></div>' : '';
-        }).join('');
+        var segsHtml = e.segs.map(function(s){ return unitSegHtml(s, max, e.n); }).join('');
         return '<div class="funnel-row"><div class="funnel-label">'+esc(e.etapa)+'</div>'+
           '<div class="funnel-track" style="display:flex">'+segsHtml+'</div>'+
           '<div class="funnel-num"><b>'+n(e.n)+'</b> · '+pct(e.pct)+'</div></div>';
@@ -1350,10 +1357,7 @@
       if(!f.total) return '<div class="card pad mini-funnel"><h3>'+vidLabel[code]+' <span class="foot-note" style="display:inline">(0)</span></h3><div class="foot-note" style="margin-top:8px">Nenhum card nesta seleção.</div></div>';
       var max = f.etapas[0].n || 1;
       var rows = f.etapas.map(function(e){
-        var segsHtml = e.segs.map(function(s){
-          var w = 100*s.n/max;
-          return w>0 ? '<div style="width:'+w+'%;background:'+UNIT_COLOR[s.unidade]+'" title="Unidade '+s.unidade+': '+s.n+'"></div>' : '';
-        }).join('');
+        var segsHtml = e.segs.map(function(s){ return unitSegHtml(s, max, e.n); }).join('');
         return '<div class="funnel-row"><div class="funnel-label">'+esc(e.etapa)+'</div>'+
           '<div class="funnel-track" style="display:flex">'+segsHtml+'</div>'+
           '<div class="funnel-num"><b>'+n(e.n)+'</b> · '+pct(e.pct)+'</div></div>';
