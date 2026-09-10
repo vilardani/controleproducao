@@ -302,15 +302,15 @@
     <section>
       <div class="grid-2">
         <div>
-          <div class="section-head"><h2>Atuando agora</h2><div class="section-sub">Cards ativos, parados numa etapa da equipe.</div></div>
+          <div class="section-head"><h2>Atuando agora</h2><div class="section-sub">Cards já puxados para produção — coluna "| Produção" da etapa.</div></div>
           <div class="table-wrap"><table id="tbl-desenho-atuando"><thead><tr>
             <th>Card</th><th>Disciplina</th><th>Etapa</th><th class="num">Dias parado</th><th></th>
           </tr></thead><tbody></tbody></table></div>
         </div>
         <div>
-          <div class="section-head"><h2>Aptos a avançar</h2><div class="section-sub">Etapa concluída, card ainda não movido de lista no Trello.</div></div>
+          <div class="section-head"><h2>Aptos a avançar</h2><div class="section-sub">Cards na fila da etapa, aguardando ser puxados para produção.</div></div>
           <div class="table-wrap"><table id="tbl-desenho-aptos"><thead><tr>
-            <th>Card</th><th>Disciplina</th><th>Etapa concluída</th><th class="num">Concluído há</th><th></th>
+            <th>Card</th><th>Disciplina</th><th>Etapa</th><th class="num">Na fila há</th><th></th>
           </tr></thead><tbody></tbody></table></div>
         </div>
       </div>
@@ -382,15 +382,15 @@
     <section>
       <div class="grid-2">
         <div>
-          <div class="section-head"><h2>Atuando agora</h2><div class="section-sub">Cards ativos, parados na etapa DG.</div></div>
+          <div class="section-head"><h2>Atuando agora</h2><div class="section-sub">Cards já puxados para produção no DG.</div></div>
           <div class="table-wrap"><table id="tbl-design-atuando"><thead><tr>
             <th>Card</th><th>Disciplina</th><th>Etapa</th><th class="num">Dias parado</th><th></th>
           </tr></thead><tbody></tbody></table></div>
         </div>
         <div>
-          <div class="section-head"><h2>Aptos a avançar</h2><div class="section-sub">DG concluído, card ainda não movido de lista no Trello.</div></div>
+          <div class="section-head"><h2>Aptos a avançar</h2><div class="section-sub">Cards na fila do DG, aguardando ser puxados para produção.</div></div>
           <div class="table-wrap"><table id="tbl-design-aptos"><thead><tr>
-            <th>Card</th><th>Disciplina</th><th>Etapa concluída</th><th class="num">Concluído há</th><th></th>
+            <th>Card</th><th>Disciplina</th><th>Etapa</th><th class="num">Na fila há</th><th></th>
           </tr></thead><tbody></tbody></table></div>
         </div>
       </div>
@@ -498,15 +498,15 @@
     <section>
       <div class="grid-2">
         <div>
-          <div class="section-head"><h2>Atuando agora</h2><div class="section-sub">Cards ativos, parados numa etapa da equipe.</div></div>
+          <div class="section-head"><h2>Atuando agora</h2><div class="section-sub">Cards já puxados para produção — coluna "| Produção" da etapa.</div></div>
           <div class="table-wrap"><table id="tbl-midia-atuando"><thead><tr>
             <th>Card</th><th>Disciplina</th><th>Etapa</th><th class="num">Dias parado</th><th></th>
           </tr></thead><tbody></tbody></table></div>
         </div>
         <div>
-          <div class="section-head"><h2>Aptos a avançar</h2><div class="section-sub">Etapa concluída, card ainda não movido de lista no Trello.</div></div>
+          <div class="section-head"><h2>Aptos a avançar</h2><div class="section-sub">Cards na fila da etapa, aguardando ser puxados para produção.</div></div>
           <div class="table-wrap"><table id="tbl-midia-aptos"><thead><tr>
-            <th>Card</th><th>Disciplina</th><th>Etapa concluída</th><th class="num">Concluído há</th><th></th>
+            <th>Card</th><th>Disciplina</th><th>Etapa</th><th class="num">Na fila há</th><th></th>
           </tr></thead><tbody></tbody></table></div>
         </div>
       </div>
@@ -586,15 +586,15 @@
     <section>
       <div class="grid-2">
         <div>
-          <div class="section-head"><h2>Atuando agora</h2><div class="section-sub">Cards ativos, parados na Web.</div></div>
+          <div class="section-head"><h2>Atuando agora</h2><div class="section-sub">Cards já puxados para produção na Web.</div></div>
           <div class="table-wrap"><table id="tbl-solucoes-atuando"><thead><tr>
             <th>Card</th><th>Disciplina</th><th>Etapa</th><th class="num">Dias parado</th><th></th>
           </tr></thead><tbody></tbody></table></div>
         </div>
         <div>
-          <div class="section-head"><h2>Aptos a avançar</h2><div class="section-sub">Web concluída, card ainda não movido de lista no Trello.</div></div>
+          <div class="section-head"><h2>Aptos a avançar</h2><div class="section-sub">Cards na fila da Web, aguardando ser puxados para produção.</div></div>
           <div class="table-wrap"><table id="tbl-solucoes-aptos"><thead><tr>
-            <th>Card</th><th>Disciplina</th><th>Etapa concluída</th><th class="num">Concluído há</th><th></th>
+            <th>Card</th><th>Disciplina</th><th>Etapa</th><th class="num">Na fila há</th><th></th>
           </tr></thead><tbody></tbody></table></div>
         </div>
       </div>
@@ -1462,22 +1462,14 @@
   // ================= Núcleo compartilhado dos painéis por equipe =================
   // "Atuando agora" / "Aptos a avançar" / Ritmo / Produtividade / Funções — a mesma lógica
   // se repete em cada painel de equipe, só muda a lista de etapas e o rótulo da equipe.
-  var EQUIPE_STAGE_SUFFIXES = [' | PRODUÇÃO'];
-  function stripStageSuffix(s){
-    for(var i=0;i<EQUIPE_STAGE_SUFFIXES.length;i++){
-      var suf = EQUIPE_STAGE_SUFFIXES[i];
-      if(s.slice(-suf.length)===suf) return s.slice(0, -suf.length);
-    }
-    return s;
-  }
   function fmtDataHora(iso){
     if(!iso) return '—';
     return new Date(iso).toLocaleString('pt-BR', {day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
   }
   function teamKpiTiles(atuando, aptos, stages){
     var tiles = [
-      {label:'Atuando agora', value:n(atuando.length), sub:'cards ativos nas etapas da equipe'},
-      {label:'Aptos a avançar', value:n(aptos.length), sub:'etapa concluída, card ainda não movido', accent:true},
+      {label:'Atuando agora', value:n(atuando.length), sub:'puxados para produção'},
+      {label:'Aptos a avançar', value:n(aptos.length), sub:'na fila, aguardando produção', accent:true},
       {label:'Etapas cobertas', value:n(stages.length), sub:stages.join(', ')}
     ];
     return tiles.map(function(t){
@@ -1485,27 +1477,29 @@
     }).join('');
   }
   var currentTeamExport = {};
+  // O board real tem DUAS listas por etapa: "{ETAPA}" (fila, aguardando início) e
+  // "{ETAPA} | PRODUÇÃO" / "{ETAPA} | PROD" (produção, alguém já pegou o card).
+  function stageListKind(rawEtapa, stageLabel){
+    var raw = (rawEtapa||'').toUpperCase(), su = stageLabel.toUpperCase();
+    if(raw===su) return 'fila';
+    if(raw.indexOf(su+' | PROD')===0) return 'producao';
+    return null;
+  }
   function renderTeamOps(prefix, eqLabel, stages, cards){
-    var stageByUpper = {};
-    stages.forEach(function(s){ stageByUpper[s.toUpperCase()] = s; });
-
-    // "Atuando agora": card ativo, sentado numa lista que corresponde a uma etapa da equipe.
-    var atuando = [];
+    // "Atuando agora": card na lista "{ETAPA} | PRODUÇÃO" — já foi puxado e está sendo trabalhado.
+    // "Aptos a avançar": card na lista "{ETAPA}" (fila) — etapa anterior concluída, aguardando
+    // ser puxado para produção nesta etapa.
+    var atuando = [], aptos = [];
     cards.forEach(function(c){
       if(c.arquivado) return;
-      var stage = stageByUpper[stripStageSuffix(c.etapa_atual)];
-      if(stage) atuando.push({card:c, etapa:stage});
+      for(var i=0;i<stages.length;i++){
+        var kind = stageListKind(c.etapa_atual, stages[i]);
+        if(kind==='producao'){ atuando.push({card:c, etapa:stages[i]}); break; }
+        if(kind==='fila'){ aptos.push({card:c, etapa:stages[i]}); break; }
+      }
     });
     atuando.sort(function(a,b){ return (b.card.dias_parado||0)-(a.card.dias_parado||0); });
-
-    // "Aptos a avançar": a etapa (mesma lista atual) já tem "fim" registrado —
-    // ou seja, já foi dada como concluída, mas o card não foi arrastado ainda.
-    var aptos = [];
-    atuando.forEach(function(a){
-      var st = a.card.stages[a.etapa];
-      if(st && st.fim) aptos.push({card:a.card, etapa:a.etapa, fim:st.fim});
-    });
-    aptos.sort(function(x,y){ return new Date(x.fim)-new Date(y.fim); });
+    aptos.sort(function(a,b){ return (b.card.dias_parado||0)-(a.card.dias_parado||0); });
 
     document.querySelector('#tbl-'+prefix+'-atuando tbody').innerHTML = atuando.length ? atuando.map(function(a){
       var c = a.card, sev = agingSeverity(c.dias_parado);
@@ -1513,19 +1507,20 @@
         '<td>'+esc(c.disciplina||'—')+'</td><td>'+esc(a.etapa)+'</td>'+
         '<td class="num"><span class="pill '+sev.c+'">'+d1(c.dias_parado)+'d</span></td>'+
         '<td><a class="row-link" target="_blank" rel="noopener" href="'+esc(c.url)+'">Trello ↗</a></td></tr>';
-    }).join('') : '<tr><td colspan="5" class="foot-note">Nenhum card ativo nesta seleção.</td></tr>';
+    }).join('') : '<tr><td colspan="5" class="foot-note">Nenhum card em produção nesta seleção.</td></tr>';
 
     document.querySelector('#tbl-'+prefix+'-aptos tbody').innerHTML = aptos.length ? aptos.map(function(a){
-      var c = a.card, dias = round1(daysBetween(a.fim, SNAPSHOT_DATE));
+      var c = a.card, sev = agingSeverity(c.dias_parado);
       return '<tr><td><a class="row-link" target="_blank" rel="noopener" href="'+esc(c.url)+'"><span class="card-name" title="'+esc(c.nome)+'">'+esc(c.nome)+'</span></a></td>'+
         '<td>'+esc(c.disciplina||'—')+'</td><td>'+esc(a.etapa)+'</td>'+
-        '<td class="num">'+d1(dias)+'d</td>'+
+        '<td class="num"><span class="pill '+sev.c+'">'+d1(c.dias_parado)+'d</span></td>'+
         '<td><a class="row-link" target="_blank" rel="noopener" href="'+esc(c.url)+'">Trello ↗</a></td></tr>';
-    }).join('') : '<tr><td colspan="5" class="foot-note">Nenhum card apto nesta seleção.</td></tr>';
+    }).join('') : '<tr><td colspan="5" class="foot-note">Nenhum card na fila nesta seleção.</td></tr>';
 
     // Ritmo & Backlog: tempo (ini→fim) dentro de cada etapa da equipe.
     var ritmoRows = stages.map(function(stage){
-      var agora = atuando.filter(function(a){ return a.etapa===stage; }).length;
+      var agora = atuando.filter(function(a){ return a.etapa===stage; }).length
+        + aptos.filter(function(a){ return a.etapa===stage; }).length;
       var diffs = [];
       cards.forEach(function(c){
         var st = c.stages[stage];
