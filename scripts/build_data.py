@@ -384,7 +384,7 @@ def main():
 
     print("Buscando Custom Fields do board...", file=sys.stderr)
     custom_field_defs = fetch_custom_field_defs(BOARD_ID)
-    print("DEBUG custom field names: " + json.dumps(sorted(f["name"] for f in custom_field_defs.values())), file=sys.stderr)
+    debug_custom_field_names = sorted(f["name"] for f in custom_field_defs.values())
 
     print("Buscando cards (ativos + arquivados)...", file=sys.stderr)
     cards_raw = trello_get_all_cards(
@@ -417,7 +417,7 @@ def main():
 
     cards_out = []
     disciplinas_map = {}  # codigo -> {nome, cards: []}
-    _debug_video_dumped = 0
+    debug_video_samples = []
 
     for c in cards_raw:
         nome = c["name"]
@@ -441,9 +441,8 @@ def main():
         resp_stages = []
         custom = build_custom_values(c, custom_field_defs)
 
-        if stage_key == "VIDEO" and not arquivado and custom and _debug_video_dumped < 6:
-            _debug_video_dumped += 1
-            print(f"DEBUG video card {nome!r} lista={etapa_atual!r} custom={json.dumps(custom, ensure_ascii=False, default=str)}", file=sys.stderr)
+        if stage_key == "VIDEO" and not arquivado and custom and len(debug_video_samples) < 8:
+            debug_video_samples.append({"nome": nome, "lista": etapa_atual, "custom": custom})
 
         if stage_key in ("TEMA", "OBJ"):
             # Conteúdo (Tema/Objetos): lê direto dos Custom Fields de
@@ -603,6 +602,9 @@ def main():
         "total_disciplinas": len(disciplinas_map),
         "total_ativos": sum(1 for c in cards_out if not c["arquivado"] and not c["template_teste"]),
         "total_arquivados": sum(1 for c in cards_out if c["arquivado"]),
+        # DEBUG temporário — remover depois de identificar os Custom Fields de vídeo.
+        "debug_custom_field_names": debug_custom_field_names,
+        "debug_video_samples": debug_video_samples,
     }
 
     data = {
