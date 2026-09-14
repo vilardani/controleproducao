@@ -1,6 +1,6 @@
 # Painel da Esteira — vilardani/controleproducao
 
-Painel de produção de conteúdo/vídeo EAD (Afya), publicado como página estática
+Painel de produção de conteúdo/vídeo, publicado como página estática
 no GitHub Pages, com os dados atualizados automaticamente a partir do Trello
 via GitHub Actions.
 
